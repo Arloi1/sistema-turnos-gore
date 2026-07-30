@@ -91,6 +91,16 @@ def estadisticas():
     registros = query.group_by(HistorialAtencion.ventanilla).all()
     return jsonify([{"ventanilla": r.ventanilla, "colaborador": OPERADORES.get(r.ventanilla), "total": r.total} for r in registros])
 
+@app.route('/limpiar_base_datos_secreto')
+def limpiar_db():
+    try:
+        Ticket.query.delete()
+        HistorialAtencion.query.delete()
+        db.session.commit()
+        return "¡Base de datos limpiada y vaciada con éxito!"
+    except Exception as e:
+        return f"Error: {e}"
+
 # RUTA PARA HISTORIAL
 @app.route('/historial', methods=['GET'])
 def historial():

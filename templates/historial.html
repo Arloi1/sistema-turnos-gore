@@ -122,7 +122,7 @@
                     <td>{{ registro.turno }}</td>
                     <td>{{ registro.ventanilla }}</td>
                     <td>{{ registro.dni }}</td>
-                    <td class="fecha-celda">{{ registro.fecha[:10] }}</td>
+                    <td class="fecha-celda">{{ registro.fecha.strftime('%Y-%m-%d') if registro.fecha else '' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

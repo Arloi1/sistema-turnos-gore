@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Atención - GORE Cajamarca</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul-gore: #004a99;
+            --dorado-gore: #c5a059;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            background: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slider-container { 
+            width: 100%; height: 65vh; 
+            overflow: hidden; 
+            position: relative; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background-color: #000;
+        }
+
+        #video-fondo {
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain;
+            background-color: #f0f2f5;
+        }
+        
+        .turnos-wrapper { 
+            flex: 1; display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            padding-top: 10px; 
+            gap: 15px;
+        }
+
+        #reloj {
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            color: var(--azul-gore);
+        }
+
+        .ventanillas-container { 
+            display: flex; 
+            gap: 60px; 
+        }
+
+        .ventanilla { 
+            background: rgb(255, 255, 255); 
+            padding: 20px 100px; 
+            border-radius: 30px; 
+            text-align: center; 
+            box-shadow: 0 40px 50px rgba(0,0,0,0.15);
+            border-left: 20px solid var(--azul-gore); 
+            width: 450px;
+            transition: all 0.3s ease;
+        }
+
+        .titulo { 
+            color: var(--dorado-gore); 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            letter-spacing: 4px; 
+            margin-bottom: 15px;
+        }
+
+        .numero { 
+            font-size: 160px; 
+            font-weight: 800; 
+            color: var(--azul-gore); 
+            margin: 0; 
+            line-height: 1;
+        }
+
+        /* Animación de alerta visual */
+        @keyframes pulso {
+            0% { transform: scale(1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px var(--dorado-gore); border-color: var(--dorado-gore); }
+            100% { transform: scale(1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        }
+
+        .activar-alerta {
+            animation: pulso 6s ease-in-out;
+        }
+
+        .footer-bar {
+            width: 100%; 
+            height: 120px; 
+            background: var(--azul-gore);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        
+        .logo-img { 
+            height: 100px; 
+            object-fit: contain; 
+            filter: brightness(0) invert(1); 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slider-container">
+        <video id="video-fondo" autoplay muted loop playsinline>
+            <source src="{{ url_for('static', filename='video1.mp4') }}" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="turnos-wrapper">
+        <div id="reloj">00:00:00</div>
+        
+        <div class="ventanillas-container">
+            <div class="ventanilla">
+                <div class="titulo">VENTANILLA NÚMERO 1</div>
+                <div id="turno-Ventanilla-01" class="numero">0</div>
+            </div>
+            <div class="ventanilla">
+                <div class="titulo">VENTANILLA NÚMERO 2</div>
+                <div id="turno-Ventanilla-02" class="numero">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bar">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="GORE Cajamarca" class="logo-img">
+    </div>
+
+    <audio id="audio-campana" src="{{ url_for('static', filename='campana.mp3') }}"></audio>
+
+    <script>
+        let estadoActual = {"Ventanilla 1": -1, "Ventanilla 2": -1};
+        let vocesDisponibles = [];
+
+        // Cargar voces asegurando compatibilidad en navegadores
+        function cargarVoces() {
+            vocesDisponibles = window.speechSynthesis.getVoices();
+        }
+
+        cargarVoces();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = cargarVoces;
+        }
+
+        window.onload = function() {
+            fetch('/obtener_todos_los_turnos')
+                .then(r => r.json())
+                .then(data => {
+                    Object.keys(data).forEach(nV => {
+                        let turno = data[nV];
+                        if (turno > 0) {
+                            estadoActual[nV] = turno;
+                            document.getElementById("turno-" + nV.replace(" ", "-")).innerText = turno;
+                        }
+                    });
+                });
+        };
+
+        function actualizarReloj() {
+            document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES');
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
+
+        function verificarTurnos() {
+            fetch('/obtener_todos_los_turnos?t=' + new Date().getTime())
+                .then(r => r.json())
+                .then(data => {
+                    Object.keys(data).forEach(nV => {
+                        let turno = data[nV];
+                        if (turno !== estadoActual[nV] && turno > 0) {
+                            estadoActual[nV] = turno;
+                            let el = document.getElementById("turno-" + nV.replace(" ", "-"));
+                            let contenedor = el.parentElement;
+
+                            el.innerText = turno;
+                            
+                            // Activar efecto visual
+                            contenedor.classList.add('activar-alerta');
+                            setTimeout(() => contenedor.classList.remove('activar-alerta'), 2000);
+                            
+                            // Reproducir audio de campana y voz
+                            let audioCampana = document.getElementById('audio-campana');
+                            audioCampana.currentTime = 0;
+                            audioCampana.play().catch(e => console.log("Audio bloqueado por políticas del navegador:", e));
+
+                            setTimeout(() => {
+                                window.speechSynthesis.cancel(); // Detener cualquier locución previa acumulada
+                                
+                                let textoLlamada = 'Turno ' + turno + ', por favor, acérquese a ' + nV;
+                                let msg = new SpeechSynthesisUtterance(textoLlamada);
+                                msg.lang = 'es-ES';
+                                msg.rate = 0.85; 
+                                msg.pitch = 1.0; 
+                                
+                                // Buscar una voz en español de calidad si está disponible
+                                if (vocesDisponibles.length === 0) {
+                                    vocesDisponibles = window.speechSynthesis.getVoices();
+                                }
+                                
+                                let vozHumana = vocesDisponibles.find(v => (v.name.includes("Google") || v.name.includes("Microsoft")) && v.lang.startsWith('es'));
+                                if (!vozHumana) {
+                                    vozHumana = vocesDisponibles.find(v => v.lang.startsWith('es'));
+                                }
+                                
+                                if (vozHumana) {
+                                    msg.voice = vozHumana;
+                                }
+
+                                window.speechSynthesis.speak(msg);
+                            }, 800);
+                        }
+                    });
+                });
+        }
+        setInterval(verificarTurnos, 2000);
+    </script>
+</body>
+</html>

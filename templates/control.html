@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Control - GORE Cajamarca</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul-gore: #004a99;
+            --azul-oscuro: #003366;
+            --dorado-gore: #c5a059;
+            --fondo-gris: #f0f4f8;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--fondo-gris);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background: var(--azul-gore);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-img {
+            height: 45px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+        header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+        .main-container {
+            flex: 1;
+            padding: 25px 30px;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 25px;
+            overflow: hidden;
+        }
+        .columna-principal {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--dorado-gore);
+        }
+        .stat-card span {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .cards-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            text-align: center;
+            border-top: 8px solid var(--azul-gore);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: fit-content;
+        }
+        .card h3 {
+            color: var(--azul-gore);
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+        }
+        .operador-tag {
+            background: #eef3f9;
+            color: var(--azul-gore);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .turno-actual {
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: var(--azul-gore);
+            margin: 10px 0;
+            line-height: 1;
+        }
+        button {
+            background: var(--azul-gore);
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0,74,153,0.2);
+            margin-top: 10px;
+        }
+        button:hover {
+            background: var(--azul-oscuro);
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info-institucional {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-left: 3px solid var(--dorado-gore);
+            text-align: left;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+        }
+        .info-row span:first-child {
+            color: #666;
+            font-weight: 600;
+        }
+        .info-row span:last-child {
+            color: var(--azul-gore);
+            font-weight: 700;
+        }
+        
+        /* Panel Lateral de Actividad */
+        .columna-lateral {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 110px);
+        }
+        .panel-lateral {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            border-right: 6px solid var(--azul-gore);
+            overflow: hidden;
+        }
+        .panel-lateral h4 {
+            color: var(--azul-gore);
+            margin-top: 0;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .historial-llamadas {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item-historial {
+            background: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--dorado-gore);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="GORE Cajamarca" class="logo-img">
+            <h2>Panel de Control de Turnos</h2>
+        </div>
+        <span id="reloj" style="font-weight: 600; font-size: 1.1rem;">00:00:00</span>
+    </header>
+
+    <div class="main-container">
+        <!-- Columna Izquierda: Estadísticas y Tarjetas de Ventanillas -->
+        <div class="columna-principal">
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <span>ESTADO DEL SISTEMA</span>
+                    <strong style="color: #28a745; font-size: 1rem;">● EN LÍNEA</strong>
+                </div>
+                <div class="stat-card">
+                    <span>PANTALLA EXTERNA</span>
+                    <button onclick="window.open('/pantalla', '_blank')" style="padding: 6px 12px; font-size: 0.85rem; width: auto; margin: 0;">Abrir TV 📺</button>
+                </div>
+            </div>
+
+            <div class="cards-wrapper">
+                <!-- Ventanilla 01 -->
+                <div class="card">
+                    <div>
+                        <h3>VENTANILLA 01</h3>
+                        <div class="operador-tag">Jhoe</div>
+                        <div id="display-Ventanilla-01" class="turno-actual">0</div>
+                    </div>
+                    <div>
+                        <button onclick="llamarSiguiente('Ventanilla 01')">Llamar Siguiente 📢</button>
+                        <div class="info-institucional">
+                            <div class="info-row">
+                                <span>Entidad:</span>
+                                <span>GORE Cajamarca</span>
+                            </div>
+                            <div class="info-row">
+                                <span>MESA DE PARTES</span>
+                                <span>SECRETARIA GENERAL</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Conexión:</span>
+                                <span style="color: #28a745;"> Sistema Sincronizado ⚡</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ventanilla 02 -->
+                <div class="card">
+                    <div>
+                        <h3>VENTANILLA 02</h3>
+                        <div class="operador-tag">Sandra</div>
+                        <div id="display-Ventanilla-02" class="turno-actual">0</div>
+                    </div>
+                    <div>
+                        <button onclick="llamarSiguiente('Ventanilla 02')">Llamar Siguiente 📢</button>
+                        <div class="info-institucional">
+                            <div class="info-row">
+                                <span>Entidad:</span>
+                                <span>GORE Cajamarca</span>
+                            </div>
+                            <div class="info-row">
+                                <span>MESA DE PARTES</span>
+                                <span>SECRETARIA GENERAL</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Conexión:</span>
+                                <span style="color: #28a745;">Sistema Sincronizado ⚡</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Registro de Actividad -->
+        <div class="columna-lateral">
+            <div class="panel-lateral">
+                <h4>Últimos Llamados 📋</h4>
+                <div id="lista-historial" class="historial-llamadas">
+                    <div style="color: #888; text-align: center; margin-top: 40px; font-size: 0.85rem;">
+                        Aún no hay llamadas registradas en esta sesión.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function actualizarReloj() {
+            document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES');
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
+
+        function registrarActividad(ventanilla, turno) {
+            let contenedor = document.getElementById('lista-historial');
+            if (contenedor.innerHTML.includes("Aún no hay llamadas")) {
+                contenedor.innerHTML = "";
+            }
+            
+            let horaActual = new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            let itemHtml = `
+                <div class="item-historial">
+                    <div><strong>${ventanilla}</strong> &rarr; Turno #${turno}</div>
+                    <span style="color: #666; font-size: 0.75rem;">${horaActual}</span>
+                </div>
+            `;
+            contenedor.insertAdjacentHTML('afterbegin', itemHtml);
+        }
+
+        function llamarSiguiente(ventanilla) {
+            fetch('/actualizar_turno/' + encodeURIComponent(ventanilla), {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    let idElemento = "display-" + data.ventanilla.replace(" ", "-");
+                    let el = document.getElementById(idElemento);
+                    if (el) {
+                        el.innerText = data.turno;
+                    }
+                    registrarActividad(data.ventanilla, data.turno);
+                } else if (data.status === 'vacio') {
+                    alert("No hay ciudadanos en espera.");
+                } else {
+                    alert("Error: " + (data.mensaje || "Desconocido"));
+                }
+            })
+            .catch(error => {
+                console.error("Error en la petición:", error);
+                alert("Error de conexión con el servidor.");
+            });
+        }
+
+        window.onload = function() {
+            fetch('/obtener_todos_los_turnos')
+                .then(r => r.json())
+                .then(data => {
+                    Object.keys(data).forEach(nV => {
+                        let turno = data[nV];
+                        let idElemento = "display-" + nV.replace(" ", "-");
+                        let el = document.getElementById(idElemento);
+                        if (el && turno > 0) {
+                            el.innerText = turno;
+                        }
+                    });
+                });
+        };
+    </script>
+</body>
+</html>

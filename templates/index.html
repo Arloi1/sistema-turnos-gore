@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesa de Partes - GORE Cajamarca</title>
+    <style>
+        :root { --gore-azul: #004a99; --gore-dorado: #c5a059; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; }
+        .header { background: var(--gore-azul); color: white; padding: 20px; text-align: center; border-bottom: 5px solid var(--gore-dorado); }
+        .container { max-width: 900px; margin: 20px auto; background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { padding: 12px; width: 60%; font-size: 16px; border: 2px solid var(--gore-azul); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: var(--gore-azul); color: white; padding: 10px; }
+        td { border-bottom: 1px solid #ddd; padding: 10px; text-align: center; }
+
+        .btn-historial { 
+            display: inline-block; 
+            padding: 10px 20px; 
+            background-color: var(--gore-dorado); 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            margin-bottom: 20px;
+        }
+        .btn-historial:hover { background-color: #a8854a; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Gore Cajamarca" style="max-width: 150px;">
+        <h1>Mesa de Partes</h1>
+    </div>
+
+    <div class="container">
+        <!-- Formulario de Registro -->
+        <form method="POST" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+            <input type="text" name="dni" placeholder="Escanear DNI..." autofocus required pattern="\d{8}">
+            <button type="submit" style="padding: 12px 20px; background: var(--gore-azul); color: white; border: none; cursor: pointer;">Registrar</button>
+        </form>
+
+        <!-- Botón para ver historial -->
+        <div style="text-align: center;">
+            <a href="/historial" class="btn-historial">Ver Historial de Atenciones</a>
+        </div>
+
+        <!-- Tabla de Registros -->
+        <table>
+            <tr><th>Turno</th><th>Fecha/Hora</th><th>DNI</th><th>Nombre</th><th>Acción</th></tr>
+            {% for t in tickets %}
+            <tr>
+                <td><strong>#{{ t.turno }}</strong></td>
+                <td>{{ t.fecha_registro }}</td>
+                <td>{{ t.dni }}</td>
+                <td>{{ t.nombre }}</td>
+                <td>
+                    <button onclick="imprimirTicket('{{ t.turno }}', '{{ t.dni }}', '{{ t.fecha_registro }}', '{{ t.nombre }}')" 
+                            style="background: var(--gore-dorado); color: white; border: none; padding: 5px 10px; cursor: pointer;">
+                        Imprimir Ticket
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <script>
+    function imprimirTicket(turno, dni, fecha, nombre) {
+        var ventana = window.open('', '', 'width=400,height=300');
+        ventana.document.write(`
+            <html>
+            <head>
+                <style>
+                    @page { margin: 0; }
+                    body { font-family: 'Arial', sans-serif; text-align: center; margin: 0; padding: 5px; }
+                    img { width: 80px; margin-bottom: 5px; filter: grayscale(1) brightness(0); }
+                    h3 { margin: 2px 0; font-size: 14px; font-weight: bold; }
+                    p { margin: 2px 0; font-size: 12px; }
+                    .numero-turno { font-size: 40px; font-weight: bold; margin: 5px 0; }
+                </style>
+            </head>
+            <body>
+                <img src="{{ url_for('static', filename='logo.png') }}">
+                <h3>MESA DE PARTES</h3>
+                <p>GORE CAJAMARCA</p>
+                <div class="numero-turno">${turno}</div>
+                <hr>
+                <p>FECHA: ${fecha}</p>
+                <p><strong>DNI: ${dni}</strong></p>
+                <p>USUARIO: ${nombre}</p>
+                <hr>
+                <p>Gracias por su preferencia.</p>
+            </body>
+            </html>
+        `);
+        ventana.document.close();
+        
+        setTimeout(function() {
+            ventana.print();
+            ventana.close();
+        }, 1000);
+    }
+    </script>
+
+</body>
+</html>

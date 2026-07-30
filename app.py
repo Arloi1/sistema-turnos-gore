@@ -1,36 +1,45 @@
 from flask import Flask, render_template, request, redirect, jsonify
-import sqlite3
 from datetime import datetime
 from urllib.parse import unquote
 import os
-from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+# Configuración de la base de datos PostgreSQL en Render (con respaldo local SQLite)
+database_url = os.environ.get('DATABASE_URL', 'postgresql://turnos_user:tKEDL05OtBzDYWxtBJzjD8trXumanuci@dpg-d9lo31tg1s2s739u3n90-a/turnos_db_dcxx')
+
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-OPERADORES = {"Ventanilla 01": "Jhoe", "Ventanilla 02": "Sandra"}
+db = SQLAlchemy(app)
 
+OPERADORES = {"Ventanilla 01": "Jhoe", "Ventanilla 02": "Sandra"}
 estado_visual = {"Ventanilla 01": 0, "Ventanilla 02": 0}
 
-def get_db():
-    conn = sqlite3.connect('tickets.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+# Definición de Modelos SQLAlchemy compatibles con PostgreSQL y SQLite
+class Ticket(db.Model):
+    __tablename__ = 'tickets'
+    id = db.Column(db.Integer, primary_key=True)
+    dni = db.Column(db.String(50))
+    nombre = db.Column(db.String(100))
+    fecha_registro = db.Column(db.String(50))
+    estado = db.Column(db.String(50))
+    turno = db.Column(db.Integer)
 
-def init_db():
-    conn = get_db()
-    conn.execute('''CREATE TABLE IF NOT EXISTS tickets 
-                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  dni TEXT, nombre TEXT, fecha_registro TEXT, estado TEXT, turno INTEGER)''')
-    conn.execute('''CREATE TABLE IF NOT EXISTS historial_atenciones 
-                  (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  ventanilla TEXT, turno INTEGER, fecha TIMESTAMP, dni TEXT)''')
-    conn.commit()
-    conn.close()
+class HistorialAtencion(db.Model):
+    __tablename__ = 'historial_atenciones'
+    id = db.Column(db.Integer, primary_key=True)
+    ventanilla = db.Column(db.String(100))
+    turno = db.Column(db.Integer)
+    fecha = db.Column(db.DateTime, default=datetime.now)
+    dni = db.Column(db.String(50))
 
-init_db()
+with app.app_context():
+    db.create_all()
 
 @app.route('/actualizar_turno/<ventanilla>', methods=['GET', 'POST'])
 def actualizar_turno(ventanilla):
@@ -38,24 +47,26 @@ def actualizar_turno(ventanilla):
     v_nombre = unquote(ventanilla)
     
     if v_nombre in estado_visual:
-        conn = get_db()
-        ticket = conn.execute('SELECT id, turno, dni FROM tickets WHERE estado="ESPERA" ORDER BY id ASC LIMIT 1').fetchone()
+        ticket = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).first()
         
         if not ticket:
-            conn.close()
             return jsonify({"status": "vacio"}), 200
         
-        turno_real = ticket['turno']
-        dni_ciudadano = ticket['dni']
+        turno_real = ticket.turno
+        dni_ciudadano = ticket.dni
         
-        conn.execute('UPDATE tickets SET estado="ATENDIDO" WHERE id=?', (ticket['id'],))
+        ticket.estado = "ATENDIDO"
         
-        conn.execute('INSERT INTO historial_atenciones (ventanilla, turno, fecha, dni) VALUES (?, ?, ?, ?)', 
-                     (v_nombre, turno_real, datetime.now(), dni_ciudadano))
+        nuevo_historial = HistorialAtencion(
+            ventanilla=v_nombre,
+            turno=turno_real,
+            fecha=datetime.now(),
+            dni=dni_ciudadano
+        )
+        db.session.add(nuevo_historial)
         
         estado_visual[v_nombre] = turno_real
-        conn.commit()
-        conn.close()
+        db.session.commit()
         
         return jsonify({"status": "ok", "ventanilla": v_nombre, "turno": turno_real})
     return jsonify({"status": "error"}), 400
@@ -63,25 +74,32 @@ def actualizar_turno(ventanilla):
 @app.route('/estadisticas', methods=['GET'])
 def estadisticas():
     filtro = request.args.get('filtro')
-    conn = get_db()
-    query = 'SELECT ventanilla, COUNT(*) as total FROM historial_atenciones WHERE 1=1 '
-    if filtro == 'dia': query += " AND date(fecha) = date('now')"
-    elif filtro == 'mes': query += " AND strftime('%m', fecha) = strftime('%m', 'now')"
-    query += " GROUP BY ventanilla"
-    registros = conn.execute(query).fetchall()
-    conn.close()
-    return jsonify([{"ventanilla": r['ventanilla'], "colaborador": OPERADORES.get(r['ventanilla']), "total": r['total']} for r in registros])
+    query = db.session.query(HistorialAtencion.ventanilla, db.func.count(HistorialAtencion.id).label('total'))
+    
+    if filtro == 'dia':
+        # Compatible con la fecha actual según el motor
+        if "postgresql" in app.config['SQLALCHEMY_DATABASE_URI']:
+            query = query.filter(db.func.date(HistorialAtencion.fecha) == db.func.current_date())
+        else:
+            query = query.filter(db.func.date(HistorialAtencion.fecha) == db.func.date('now'))
+    elif filtro == 'mes':
+        if "postgresql" in app.config['SQLALCHEMY_DATABASE_URI']:
+            query = query.filter(db.extract('month', HistorialAtencion.fecha) == db.extract('month', db.func.current_date()))
+        else:
+            query = query.filter(db.func.strftime('%m', HistorialAtencion.fecha) == db.func.strftime('%m', 'now'))
+            
+    registros = query.group_by(HistorialAtencion.ventanilla).all()
+    return jsonify([{"ventanilla": r.ventanilla, "colaborador": OPERADORES.get(r.ventanilla), "total": r.total} for r in registros])
 
 # RUTA PARA HISTORIAL
 @app.route('/historial', methods=['GET'])
 def historial():
-    conn = get_db()
-    registros = conn.execute('SELECT * FROM historial_atenciones ORDER BY id DESC').fetchall()
-    conn.close()
+    registros = HistorialAtencion.query.order_by(HistorialAtencion.id.desc()).all()
     return render_template('historial.html', registros=registros)
 
 @app.route('/obtener_todos_los_turnos', methods=['GET'])
-def obtener_todos(): return jsonify(estado_visual)
+def obtener_todos(): 
+    return jsonify(estado_visual)
 
 @app.route('/resetear_turnos', methods=['POST'])
 def resetear_turnos():
@@ -91,26 +109,32 @@ def resetear_turnos():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    conn = get_db()
     if request.method == 'POST':
         dni = request.form.get('dni')
         if dni:
-            last = conn.execute('SELECT MAX(turno) as max_t FROM tickets').fetchone()
-            nuevo_turno = (last['max_t'] or 0) + 1
-            conn.execute('INSERT INTO tickets (dni, nombre, fecha_registro, estado, turno) VALUES (?, ?, ?, ?, ?)', 
-                         (dni, "Ciudadano", datetime.now().strftime("%d/%m/%Y %H:%M"), 'ESPERA', nuevo_turno))
-            conn.commit()
+            max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
+            nuevo_turno = (max_t or 0) + 1
+            nuevo_ticket = Ticket(
+                dni=dni,
+                nombre="Ciudadano",
+                fecha_registro=datetime.now().strftime("%d/%m/%Y %H:%M"),
+                estado='ESPERA',
+                turno=nuevo_turno
+            )
+            db.session.add(nuevo_ticket)
+            db.session.commit()
             return redirect('/')
     
-    tickets = conn.execute('SELECT * FROM tickets WHERE estado="ESPERA" ORDER BY id ASC').fetchall()
-    conn.close()
+    tickets = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).all()
     return render_template('index.html', tickets=tickets)
 
 @app.route('/control')
-def control(): return render_template('control.html')
+def control(): 
+    return render_template('control.html')
 
 @app.route('/pantalla')
-def pantalla(): return render_template('pantalla.html')
+def pantalla(): 
+    return render_template('pantalla.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

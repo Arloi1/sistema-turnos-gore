@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Configuración de la base de datos PostgreSQL en Render (con respaldo local SQLite)
 database_url = os.environ.get('DATABASE_URL', 'postgresql://turnos_user:tKEDL05OtBzDYWxtBJzjD8trXumanuci@dpg-d9lo31tg1s2s739u3n90-a/turnos_db_dcxx')
 
 if database_url and database_url.startswith("postgres://"):
@@ -20,7 +19,7 @@ db = SQLAlchemy(app)
 OPERADORES = {"Ventanilla 01": "Jhoe", "Ventanilla 02": "Sandra"}
 estado_visual = {"Ventanilla 01": 0, "Ventanilla 02": 0}
 
-# Definición de Modelos SQLAlchemy compatibles con PostgreSQL y SQLite
+
 class Ticket(db.Model):
     __tablename__ = 'tickets'
     id = db.Column(db.Integer, primary_key=True)
@@ -41,6 +40,7 @@ class HistorialAtencion(db.Model):
 with app.app_context():
     db.create_all()
 
+# RUTA PARA ACTUALIZAR LOS TURNOS EN LA PANTALLA DE LA TV
 @app.route('/actualizar_turno/<ventanilla>', methods=['GET', 'POST'])
 def actualizar_turno(ventanilla):
     global estado_visual
@@ -71,6 +71,7 @@ def actualizar_turno(ventanilla):
         return jsonify({"status": "ok", "ventanilla": v_nombre, "turno": turno_real})
     return jsonify({"status": "error"}), 400
 
+# RUTA DE LAS ESTADÍSTICAS MOSTRADAS EN EL HISTORIAL DE ATENCIONES
 @app.route('/estadisticas', methods=['GET'])
 def estadisticas():
     filtro = request.args.get('filtro')
@@ -90,7 +91,8 @@ def estadisticas():
             
     registros = query.group_by(HistorialAtencion.ventanilla).all()
     return jsonify([{"ventanilla": r.ventanilla, "colaborador": OPERADORES.get(r.ventanilla), "total": r.total} for r in registros])
-
+    
+# RUTA PARA LIMPIAR BASE DE DATOS
 @app.route('/limpiar_base_datos_secreto')
 def limpiar_db():
     try:
@@ -112,15 +114,18 @@ def historial():
         db.create_all()
         return render_template('historial.html', registros=[])
 
+# RUTA PARA OBTENER LOS TURNOS 
 @app.route('/obtener_todos_los_turnos', methods=['GET'])
 def obtener_todos(): 
     return jsonify(estado_visual)
 
+# RUTA PARA RESETEAR LOS TURNOS 
 @app.route('/resetear_turnos', methods=['POST'])
 def resetear_turnos():
     global estado_visual
     estado_visual = {"Ventanilla 01": 0, "Ventanilla 02": 0}
     return jsonify({"status": "reseteado"})
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -143,10 +148,12 @@ def index():
     tickets = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).all()
     return render_template('index.html', tickets=tickets)
 
+# RUTA PARA EL CONTROL DEL CAMBIO DE TURNOS
 @app.route('/control')
 def control(): 
     return render_template('control.html')
 
+# RUTA PARA MOSTRAR EN LA PANTALLA DE LA TV
 @app.route('/pantalla')
 def pantalla(): 
     return render_template('pantalla.html')

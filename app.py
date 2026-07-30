@@ -3,7 +3,12 @@ import sqlite3
 from datetime import datetime
 from urllib.parse import unquote
 import os
+from flask import Flask
+
 app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 OPERADORES = {"Ventanilla 01": "Jhoe", "Ventanilla 02": "Sandra"}
 

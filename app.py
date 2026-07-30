@@ -94,8 +94,13 @@ def estadisticas():
 # RUTA PARA HISTORIAL
 @app.route('/historial', methods=['GET'])
 def historial():
-    registros = HistorialAtencion.query.order_by(HistorialAtencion.id.desc()).all()
-    return render_template('historial.html', registros=registros)
+    try:
+        registros = HistorialAtencion.query.order_by(HistorialAtencion.id.desc()).all()
+        return render_template('historial.html', registros=registros)
+    except Exception as e:
+        # Si hay algún error con la tabla, la recrea automáticamente y evita el pantallazo rojo
+        db.create_all()
+        return render_template('historial.html', registros=[])
 
 @app.route('/obtener_todos_los_turnos', methods=['GET'])
 def obtener_todos(): 

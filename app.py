@@ -77,7 +77,7 @@ def estadisticas():
     filtro = request.args.get('filtro')
     query = db.session.query(HistorialAtencion.ventanilla, db.func.count(HistorialAtencion.id).label('total'))
     
-    if filtro == 'dia':
+    if filtro == 'dia': 
         # Compatible con la fecha actual según el motor
         if "postgresql" in app.config['SQLALCHEMY_DATABASE_URI']:
             query = query.filter(db.func.date(HistorialAtencion.fecha) == db.func.current_date())
@@ -95,11 +95,14 @@ def estadisticas():
 # RUTA PARA LIMPIAR BASE DE DATOS
 @app.route('/limpiar_base_datos_secreto')
 def limpiar_db():
+    global estado_visual
     try:
         Ticket.query.delete()
         HistorialAtencion.query.delete()
         db.session.commit()
-        return "¡Base de datos limpiada y vaciada con éxito!"
+        # Reiniciar los contadores visuales a 0
+        estado_visual = {"Ventanilla 01": 0, "Ventanilla 02": 0}
+        return "¡Base de datos y contadores reiniciados a 0 con éxito!"
     except Exception as e:
         return f"Error: {e}"
 

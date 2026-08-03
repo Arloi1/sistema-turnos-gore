@@ -3,6 +3,7 @@ from datetime import datetime
 from urllib.parse import unquote
 import os
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 app = Flask(__name__)
 

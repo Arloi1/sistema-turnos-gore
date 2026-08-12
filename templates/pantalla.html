@@ -22,7 +22,6 @@
             overflow: hidden;
         }
 
-        /* Altura ajustada a la línea roja solicitada */
         .slider-container { 
             width: 100%; 
             height: 52vh; 
@@ -125,7 +124,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            box-shadow: -4px 15px rgba(0,0,0,0.1);
         }
         
         .logo-img { 
@@ -138,7 +137,8 @@
 <body>
 
     <div class="slider-container">
-        <video id="video-fondo" autoplay muted loop playsinline>
+        <!-- Quitamos 'muted' para que el video reproduzca su audio ambiental -->
+        <video id="video-fondo" autoplay loop playsinline>
             <source src="{{ url_for('static', filename='video1.mp4') }}" type="video/mp4">
         </video>
     </div>
@@ -171,6 +171,10 @@
     <script>
         let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
         let vocesDisponibles = [];
+        const videoFondo = document.getElementById('video-fondo');
+
+        // Permitir que el video tenga sonido (los navegadores a veces bloquean audio automático sin interacción previa)
+        videoFondo.volume = 0.8; // Puedes ajustar el volumen del video aquí (0.0 a 1.0)
 
         function cargarVoces() {
             vocesDisponibles = window.speechSynthesis.getVoices();
@@ -222,6 +226,9 @@
                             contenedor.classList.add('activar-alerta');
                             setTimeout(() => contenedor.classList.remove('activar-alerta'), 4000);
                             
+                            // 1. PAUSAR EL VIDEO AMBIENTAL AL LLAMAR AL TURNO
+                            videoFondo.pause();
+
                             let audioCampana = document.getElementById('audio-campana');
                             audioCampana.currentTime = 0;
                             audioCampana.play().catch(e => console.log("Audio bloqueado:", e));
@@ -253,6 +260,11 @@
                                 if (vozHumana) {
                                     msg.voice = vozHumana;
                                 }
+
+                                // 2. REANUDAR EL VIDEO AMBIENTAL CUANDO TERMINE DE HABLAR LA VOZ SINTÉTICA
+                                msg.onend = function() {
+                                    videoFondo.play().catch(e => console.log("No se pudo reanudar el video automáticamente:", e));
+                                };
 
                                 window.speechSynthesis.speak(msg);
                             }, 800);

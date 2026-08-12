@@ -3,111 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <title>Sistema de Atención - GORE Cajamarca</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --azul-gore: #004a99;
+            --azul-gore: #003366;
+            --azul-claro-gore: #004a99;
             --dorado-gore: #c5a059;
+            --fondo-gris: #eef2f7;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
             margin: 0; 
-            background: #f0f2f5; 
+            background: var(--fondo-gris); 
             display: flex; 
             flex-direction: column; 
             height: 100vh;
             overflow: hidden;
         }
 
+        /* Contenedor del video en la parte superior sin espacios vacíos */
         .slider-container { 
-            width: 100%; height: 50vh; 
+            width: 100%; 
+            height: 44vh; 
             overflow: hidden; 
             position: relative; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             background-color: #000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
         #video-fondo {
             width: 100%; 
             height: 100%; 
-            object-fit: contain;
-            background-color: #f0f2f5;
+            object-fit: cover; /* Cambiado a cover para rellenar estéticamente sin franjas */
         }
         
+        /* Contenedor principal de turnos y reloj */
         .turnos-wrapper { 
-            flex: 1; display: flex; 
+            flex: 1; 
+            display: flex; 
             flex-direction: column;
             justify-content: center; 
             align-items: center; 
-            padding-top: 5px; 
-            gap: 10px;
+            padding: 10px 20px; 
+            gap: 15px;
         }
 
         #reloj {
-            font-size: 2rem; 
-            font-weight: 700; 
+            font-size: 2.2rem; 
+            font-weight: 800; 
             color: var(--azul-gore);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            letter-spacing: 2px;
         }
 
+        /* Distribución equitativa y simétrica de las 3 ventanillas */
         .ventanillas-container { 
-            display: flex; 
-            gap: 30px; 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 95%;
+            max-width: 1400px;
         }
 
         .ventanilla { 
-            background: rgb(255, 255, 255); 
-            padding: 15px 40px; 
-            border-radius: 25px; 
+            background: #ffffff; 
+            padding: 25px 20px; 
+            border-radius: 20px; 
             text-align: center; 
-            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
-            border-left: 15px solid var(--azul-gore); 
-            width: 320px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            border-top: 6px solid var(--azul-claro-gore); 
+            border-left: none;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .ventanilla.preferencial {
-            border-left: 15px solid var(--dorado-gore);
+            border-top: 6px solid var(--dorado-gore);
         }
 
         .titulo { 
-            color: var(--dorado-gore); 
-            font-size: 1.3rem; 
+            color: var(--azul-gore); 
+            font-size: 1.2rem; 
             font-weight: 800; 
-            letter-spacing: 2px; 
-            margin-bottom: 10px;
+            letter-spacing: 1.5px; 
+            margin-bottom: 5px;
+        }
+
+        .ventanilla.preferencial .titulo {
+            color: var(--dorado-gore);
         }
 
         .numero { 
-            font-size: 110px; 
-            font-weight: 800; 
-            color: var(--azul-gore); 
+            font-size: min(13vw, 130px); 
+            font-weight: 900; 
+            color: var(--azul-claro-gore); 
             margin: 0; 
-            line-height: 1;
+            line-height: 1.1;
         }
 
-        /* Animación de alerta visual */
-        @keyframes pulso {
-            0% { transform: scale(1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px var(--dorado-gore); border-color: var(--dorado-gore); }
-            100% { transform: scale(1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .ventanilla.preferencial .numero {
+            color: #b38f45;
+        }
+
+        /* Animación de alerta visual elegante */
+        @keyframes pulsoCard {
+            0% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+            50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(197, 160, 89, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
         }
 
         .activar-alerta {
-            animation: pulso 6s ease-in-out;
+            animation: pulsoCard 1.5s ease-in-out infinite;
         }
 
+        /* Barra inferior institucional */
         .footer-bar {
             width: 100%; 
-            height: 90px; 
+            height: 80px; 
             background: var(--azul-gore);
             display: flex; 
             align-items: center; 
             justify-content: center;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
         }
         
         .logo-img { 
-            height: 70px; 
+            height: 55px; 
             object-fit: contain; 
             filter: brightness(0) invert(1); 
         }
@@ -134,7 +160,7 @@
                 <div id="turno-Ventanilla-02" class="numero">0</div>
             </div>
             <div class="ventanilla preferencial">
-                <div class="titulo">VENTANILLA 03 (PREF.)</div>
+                <div class="titulo">VENTANILLA 03 (PREFERENCIAL)</div>
                 <div id="turno-Ventanilla-03" class="numero">0</div>
             </div>
         </div>
@@ -176,7 +202,8 @@
         };
 
         function actualizarReloj() {
-            document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES');
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES', options);
         }
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
@@ -192,13 +219,13 @@
                             let elementId = "turno-" + nV.replace(/ /g, "-");
                             let el = document.getElementById(elementId);
                             if (!el) return;
-                            let contenedor = el.parentElement;
+                            let contenedor = el.closest('.ventanilla');
 
                             el.innerText = turno;
                             
-                            // Activar efecto visual
+                            // Activar efecto visual de llamada
                             contenedor.classList.add('activar-alerta');
-                            setTimeout(() => contenedor.classList.remove('activar-alerta'), 2000);
+                            setTimeout(() => contenedor.classList.remove('activar-alerta'), 4000);
                             
                             // Reproducir audio de campana
                             let audioCampana = document.getElementById('audio-campana');
@@ -208,7 +235,6 @@
                             setTimeout(() => {
                                 window.speechSynthesis.cancel(); 
                                 
-                                // Texto personalizado si es la ventanilla preferencial (Ventanilla 03)
                                 let textoLlamada = '';
                                 if (nV === "Ventanilla 03") {
                                     textoLlamada = 'Turno número ' + turno + ', por favor, diríjase a la Ventanilla número 3 preferencial';

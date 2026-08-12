@@ -88,7 +88,6 @@
             letter-spacing: 0.5px;
         }
         
-        /* Contenedor centrado para el panel individual del operador */
         .panel-operador-wrapper {
             display: flex;
             justify-content: center;
@@ -192,7 +191,6 @@
             font-weight: 700;
         }
         
-        /* Panel Lateral de Actividad */
         .columna-lateral {
             display: flex;
             flex-direction: column;
@@ -248,7 +246,6 @@
     </header>
 
     <div class="main-container">
-        <!-- Columna Izquierda: Panel exclusivo del operador en sesión -->
         <div class="columna-principal">
             <div class="stats-bar">
                 <div class="stat-card">
@@ -262,7 +259,6 @@
             </div>
 
             <div class="panel-operador-wrapper">
-                <!-- Tarjeta dinámica del operador actual -->
                 <div id="card-operador" class="card">
                     <div>
                         <h3 id="lbl-ventanilla">VENTANILLA</h3>
@@ -271,7 +267,6 @@
                     </div>
                     <div>
                         <div id="botones-accion">
-                            <!-- Los botones se inyectan dinámicamente según el operador -->
                         </div>
                         <div class="info-institucional">
                             <div class="info-row">
@@ -292,7 +287,6 @@
             </div>
         </div>
 
-        <!-- Columna Derecha: Registro de Actividad -->
         <div class="columna-lateral">
             <div class="panel-lateral">
                 <h4>Últimos Llamados 📋</h4>
@@ -306,14 +300,12 @@
     </div>
 
     <script>
-        // Identificar qué operador está usando esta pantalla (inyectado desde Flask o leído de la URL)
-        // Ejemplo esperado de variable global o parámetro: operadorActual = 'Sandra', 'Yajaira' o 'Jhoe'
         const operadorActual = "{{ operador|default('Sandra') }}"; 
 
-        // Configuración de los operadores
+        // CONFIGURACIÓN CORREGIDA: Yajaira=Ventanilla 01, Sandra=Ventanilla 02, Jhoe=Ventanilla 03
         const datosConfig = {
-            "Sandra": { ventanilla: "Ventanilla 01", preferencial: false },
-            "Yajaira": { ventanilla: "Ventanilla 02", preferencial: false },
+            "Yajaira": { ventanilla: "Ventanilla 01", preferencial: false },
+            "Sandra": { ventanilla: "Ventanilla 02", preferencial: false },
             "Jhoe": { ventanilla: "Ventanilla 03", preferencial: true }
         };
 
@@ -327,7 +319,6 @@
             document.getElementById('card-operador').classList.add('preferencial-card');
         }
 
-        // Construir los botones dinámicamente según el operador
         let contenedorBotones = document.getElementById('botones-accion');
         if (config.preferencial) {
             contenedorBotones.innerHTML = `
@@ -387,7 +378,6 @@
             });
         }
 
-        // Cargar el turno actual de su ventanilla al iniciar
         window.onload = function() {
             fetch('/obtener_todos_los_turnos')
                 .then(r => r.json())

@@ -133,7 +133,6 @@
             filter: brightness(0) invert(1); 
         }
 
-        /* Capa inicial elegante que desaparece sola al primer toque o carga */
         #overlay-inicio {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -152,14 +151,12 @@
 </head>
 <body onclick="iniciarSistemaUnico()">
 
-    <!-- Esta pantalla solo aparece una sola vez al encender/cargar la TV para cumplir con las políticas del navegador -->
     <div id="overlay-inicio">
         <h2 style="color: #c5a059; margin-bottom: 10px;">SISTEMA DE ATENCIÓN - GORE CAJAMARCA</h2>
         <p style="font-size: 1.2rem;">Haz clic en cualquier lugar para iniciar la pantalla con audio y video</p>
     </div>
 
     <div class="slider-container">
-        <!-- El video arranca con sonido y se mantiene reproduciéndose sin pausas molestas -->
         <video id="video-fondo" autoplay loop playsinline>
             <source src="{{ url_for('static', filename='video1.mp4') }}" type="video/mp4">
         </video>
@@ -195,9 +192,11 @@
         let vocesDisponibles = [];
         let sistemaIniciado = false;
         const videoFondo = document.getElementById('video-fondo');
-        videoFondo.volume = 0.7; // Nivel de volumen del video ambiental
+        
+        const VOLUMEN_NORMAL = 0.8; // Volumen habitual del video
+        const VOLUMEN_BAJO = 0.15;  // Volumen reducido cuando llama un turno
+        videoFondo.volume = VOLUMEN_NORMAL;
 
-        // Función que desbloquea el audio del navegador UNA SOLA VEZ al arrancar la TV
         function iniciarSistemaUnico() {
             if (sistemaIniciado) return;
             sistemaIniciado = true;
@@ -262,7 +261,9 @@
                             contenedor.classList.add('activar-alerta');
                             setTimeout(() => contenedor.classList.remove('activar-alerta'), 4000);
                             
-                            // SE REPRODUCE LA CAMPANA Y LA VOZ SIN TOCAR NI PAUSAR EL VIDEO DE FONDO
+                            // 1. BAJAR EL VOLUMEN DEL VIDEO SUAVEMENTE AL LLAMAR
+                            videoFondo.volume = VOLUMEN_BAJO;
+
                             let audioCampana = document.getElementById('audio-campana');
                             audioCampana.currentTime = 0;
                             audioCampana.play().catch(e => console.log("Audio campana bloqueado:", e));
@@ -294,6 +295,11 @@
                                 if (vozHumana) {
                                     msg.voice = vozHumana;
                                 }
+
+                                // 2. RESTAURAR EL VOLUMEN NORMAL CUANDO TERMINE DE HABLAR LA VOZ
+                                msg.onend = function() {
+                                    videoFondo.volume = VOLUMEN_NORMAL;
+                                };
 
                                 window.speechSynthesis.speak(msg);
                             }, 800);

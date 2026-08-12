@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - GORE Cajamarca</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -48,20 +49,22 @@
         }
         .main-container {
             flex: 1;
-            padding: 25px 30px;
-            max-width: 1300px;
+            padding: 20px 30px;
+            max-width: 1400px;
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
             display: grid;
-            grid-template-columns: 2.2fr 1fr;
-            gap: 25px;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 20px;
             overflow: hidden;
         }
         .columna-principal {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
         .stats-bar {
             display: grid;
@@ -70,7 +73,7 @@
         }
         .stat-card {
             background: white;
-            padding: 15px 20px;
+            padding: 12px 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
             display: flex;
@@ -86,12 +89,12 @@
         }
         .cards-wrapper {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
         }
         .card {
             background: white;
-            padding: 25px 20px;
+            padding: 20px 15px;
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             text-align: center;
@@ -101,10 +104,13 @@
             justify-content: space-between;
             height: fit-content;
         }
+        .card.preferencial-card {
+            border-top: 8px solid var(--dorado-gore);
+        }
         .card h3 {
             color: var(--azul-gore);
             margin: 0 0 5px 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         .operador-tag {
             background: #eef3f9;
@@ -117,25 +123,25 @@
             margin-bottom: 5px;
         }
         .turno-actual {
-            font-size: 4.5rem;
+            font-size: 3.8rem;
             font-weight: 800;
             color: var(--azul-gore);
-            margin: 10px 0;
+            margin: 5px 0;
             line-height: 1;
         }
         button {
             background: var(--azul-gore);
             color: white;
             border: none;
-            padding: 12px;
-            font-size: 0.95rem;
+            padding: 10px;
+            font-size: 0.9rem;
             font-weight: bold;
             border-radius: 10px;
             cursor: pointer;
             width: 100%;
             transition: background 0.2s, transform 0.1s;
             box-shadow: 0 4px 10px rgba(0,74,153,0.2);
-            margin-top: 10px;
+            margin-top: 8px;
         }
         button:hover {
             background: var(--azul-oscuro);
@@ -144,22 +150,29 @@
         button:active {
             transform: translateY(0);
         }
+        .btn-preferencial {
+            background: var(--dorado-gore);
+            box-shadow: 0 4px 10px rgba(197,160,89,0.3);
+        }
+        .btn-preferencial:hover {
+            background: #b08d47;
+        }
 
         .info-institucional {
             background: #f8fafc;
             border-radius: 8px;
-            padding: 10px 12px;
-            margin-top: 12px;
+            padding: 8px 10px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
             border-left: 3px solid var(--dorado-gore);
             text-align: left;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.78rem;
+            font-size: 0.72rem;
         }
         .info-row span:first-child {
             color: #666;
@@ -240,33 +253,33 @@
             </div>
 
             <div class="cards-wrapper">
-                <!-- Ventanilla 01 -->
+                <!-- Ventanilla 01: Yajaira -->
                 <div class="card">
                     <div>
                         <h3>VENTANILLA 01</h3>
-                        <div class="operador-tag">Jhoe</div>
+                        <div class="operador-tag">Yajaira</div>
                         <div id="display-Ventanilla-01" class="turno-actual">0</div>
                     </div>
                     <div>
-                        <button onclick="llamarSiguiente('Ventanilla 01')">Llamar Siguiente 📢</button>
+                        <button onclick="llamarSiguiente('Ventanilla 01', 'normal')">Siguiente Turno 📢</button>
                         <div class="info-institucional">
                             <div class="info-row">
                                 <span>Entidad:</span>
                                 <span>GORE Cajamarca</span>
                             </div>
                             <div class="info-row">
-                                <span>MESA DE PARTES</span>
                                 <span>SECRETARIA GENERAL</span>
+                                <span>MESA PARTES</span>
                             </div>
                             <div class="info-row">
                                 <span>Conexión:</span>
-                                <span style="color: #28a745;"> Sistema Sincronizado ⚡</span>
+                                <span style="color: #28a745;">Sincronizado ⚡</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Ventanilla 02 -->
+                <!-- Ventanilla 02: Sandra -->
                 <div class="card">
                     <div>
                         <h3>VENTANILLA 02</h3>
@@ -274,19 +287,46 @@
                         <div id="display-Ventanilla-02" class="turno-actual">0</div>
                     </div>
                     <div>
-                        <button onclick="llamarSiguiente('Ventanilla 02')">Llamar Siguiente 📢</button>
+                        <button onclick="llamarSiguiente('Ventanilla 02', 'normal')">Siguiente Turno 📢</button>
                         <div class="info-institucional">
                             <div class="info-row">
                                 <span>Entidad:</span>
                                 <span>GORE Cajamarca</span>
                             </div>
                             <div class="info-row">
-                                <span>MESA DE PARTES</span>
                                 <span>SECRETARIA GENERAL</span>
+                                <span>MESA PARTES</span>
                             </div>
                             <div class="info-row">
                                 <span>Conexión:</span>
-                                <span style="color: #28a745;">Sistema Sincronizado ⚡</span>
+                                <span style="color: #28a745;">Sincronizado ⚡</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ventanilla 03: Jhoe (Con Preferencial) -->
+                <div class="card preferencial-card">
+                    <div>
+                        <h3>VENTANILLA 03</h3>
+                        <div class="operador-tag">Jhoe</div>
+                        <div id="display-Ventanilla-03" class="turno-actual">0</div>
+                    </div>
+                    <div>
+                        <button onclick="llamarSiguiente('Ventanilla 03', 'normal')">Siguiente Turno 📢</button>
+                        <button class="btn-preferencial" onclick="llamarSiguiente('Ventanilla 03', 'preferencial')">Llamar Preferencial 🌟</button>
+                        <div class="info-institucional">
+                            <div class="info-row">
+                                <span>Entidad:</span>
+                                <span>GORE Cajamarca</span>
+                            </div>
+                            <div class="info-row">
+                                <span>SECRETARIA GENERAL</span>
+                                <span>PREFERENCIAL</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Conexión:</span>
+                                <span style="color: #28a745;">Sincronizado ⚡</span>
                             </div>
                         </div>
                     </div>
@@ -314,24 +354,25 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        function registrarActividad(ventanilla, turno) {
+        function registrarActividad(ventanilla, turno, esPreferencial) {
             let contenedor = document.getElementById('lista-historial');
             if (contenedor.innerHTML.includes("Aún no hay llamadas")) {
                 contenedor.innerHTML = "";
             }
             
             let horaActual = new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            let badgePref = esPreferencial ? ' <span style="color: #c5a059; font-weight: bold;">(🌟 Preferencial)</span>' : '';
             let itemHtml = `
                 <div class="item-historial">
-                    <div><strong>${ventanilla}</strong> &rarr; Turno #${turno}</div>
+                    <div><strong>${ventanilla}</strong> &rarr; Turno #${turno}${badgePref}</div>
                     <span style="color: #666; font-size: 0.75rem;">${horaActual}</span>
                 </div>
             `;
             contenedor.insertAdjacentHTML('afterbegin', itemHtml);
         }
 
-        function llamarSiguiente(ventanilla) {
-            fetch('/actualizar_turno/' + encodeURIComponent(ventanilla), {
+        function llamarSiguiente(ventanilla, tipo = 'normal') {
+            fetch(`/actualizar_turno/${encodeURIComponent(ventanilla)}?tipo=${tipo}`, {
                 method: 'POST'
             })
             .then(response => response.json())
@@ -342,7 +383,7 @@
                     if (el) {
                         el.innerText = data.turno;
                     }
-                    registrarActividad(data.ventanilla, data.turno);
+                    registrarActividad(data.ventanilla, data.turno, data.es_preferencial);
                 } else if (data.status === 'vacio') {
                     alert("No hay ciudadanos en espera.");
                 } else {

@@ -132,13 +132,34 @@
             object-fit: contain; 
             filter: brightness(0) invert(1); 
         }
+
+        /* Capa de aviso si el navegador bloquea el audio al inicio */
+        #overlay-inicio {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Capa para habilitar el audio y video con un clic inicial exigido por el navegador -->
+    <div id="overlay-inicio" onclick="activarAudioVideo()">
+        <div>📺 Haz clic en cualquier parte para iniciar la Pantalla de TV con Audio</div>
+    </div>
+
     <div class="slider-container">
-        <!-- Quitamos 'muted' para que el video reproduzca su audio ambiental -->
-        <video id="video-fondo" autoplay loop playsinline>
+        <video id="video-fondo" loop playsinline>
             <source src="{{ url_for('static', filename='video1.mp4') }}" type="video/mp4">
         </video>
     </div>
@@ -172,9 +193,19 @@
         let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
         let vocesDisponibles = [];
         const videoFondo = document.getElementById('video-fondo');
+        videoFondo.volume = 1.0; // Volumen al máximo
 
-        // Permitir que el video tenga sonido (los navegadores a veces bloquean audio automático sin interacción previa)
-        videoFondo.volume = 0.8; // Puedes ajustar el volumen del video aquí (0.0 a 1.0)
+        // Función que destraba las políticas de los navegadores al hacer el primer clic en la TV
+        function activarAudioVideo() {
+            const overlay = document.getElementById('overlay-inicio');
+            videoFondo.muted = false;
+            videoFondo.play().then(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500); // Remueve la capa visual
+            }).catch(e => {
+                console.log("Error al reproducir video:", e);
+            });
+        }
 
         function cargarVoces() {
             vocesDisponibles = window.speechSynthesis.getVoices();
@@ -231,7 +262,7 @@
 
                             let audioCampana = document.getElementById('audio-campana');
                             audioCampana.currentTime = 0;
-                            audioCampana.play().catch(e => console.log("Audio bloqueado:", e));
+                            audioCampana.play().catch(e => console.log("Audio campana bloqueado:", e));
 
                             setTimeout(() => {
                                 window.speechSynthesis.cancel(); 

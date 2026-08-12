@@ -50,6 +50,13 @@ class HistorialAtencion(db.Model):
 
 with app.app_context():
     db.create_all()
+    # Solución automática para bases de datos existentes en Render que no tengan la columna preferencial
+    try:
+        db.session.execute(text('ALTER TABLE tickets ADD COLUMN IF NOT EXISTS preferencial BOOLEAN DEFAULT FALSE;'))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print("Nota de migración automática:", e)
 
 @app.route('/actualizar_turno/<ventanilla>', methods=['GET', 'POST'])
 def actualizar_turno(ventanilla):

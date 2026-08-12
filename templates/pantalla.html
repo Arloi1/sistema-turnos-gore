@@ -133,33 +133,34 @@
             filter: brightness(0) invert(1); 
         }
 
-        /* Capa de aviso si el navegador bloquea el audio al inicio */
+        /* Capa inicial elegante que desaparece sola al primer toque o carga */
         #overlay-inicio {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
             transition: opacity 0.5s ease;
         }
     </style>
 </head>
-<body>
+<body onclick="iniciarSistemaUnico()">
 
-    <!-- Capa para habilitar el audio y video con un clic inicial exigido por el navegador -->
-    <div id="overlay-inicio" onclick="activarAudioVideo()">
-        <div>📺 Haz clic en cualquier parte para iniciar la Pantalla de TV con Audio</div>
+    <!-- Esta pantalla solo aparece una sola vez al encender/cargar la TV para cumplir con las políticas del navegador -->
+    <div id="overlay-inicio">
+        <h2 style="color: #c5a059; margin-bottom: 10px;">SISTEMA DE ATENCIÓN - GORE CAJAMARCA</h2>
+        <p style="font-size: 1.2rem;">Haz clic en cualquier lugar para iniciar la pantalla con audio y video</p>
     </div>
 
     <div class="slider-container">
-        <video id="video-fondo" loop playsinline>
+        <!-- El video arranca con sonido y se mantiene reproduciéndose sin pausas molestas -->
+        <video id="video-fondo" autoplay loop playsinline>
             <source src="{{ url_for('static', filename='video1.mp4') }}" type="video/mp4">
         </video>
     </div>
@@ -192,19 +193,23 @@
     <script>
         let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
         let vocesDisponibles = [];
+        let sistemaIniciado = false;
         const videoFondo = document.getElementById('video-fondo');
-        videoFondo.volume = 1.0; // Volumen al máximo
+        videoFondo.volume = 0.7; // Nivel de volumen del video ambiental
 
-        // Función que destraba las políticas de los navegadores al hacer el primer clic en la TV
-        function activarAudioVideo() {
-            const overlay = document.getElementById('overlay-inicio');
+        // Función que desbloquea el audio del navegador UNA SOLA VEZ al arrancar la TV
+        function iniciarSistemaUnico() {
+            if (sistemaIniciado) return;
+            sistemaIniciado = true;
+
             videoFondo.muted = false;
-            videoFondo.play().then(() => {
+            videoFondo.play().catch(e => console.log("Video play error:", e));
+
+            const overlay = document.getElementById('overlay-inicio');
+            if (overlay) {
                 overlay.style.opacity = '0';
-                setTimeout(() => overlay.remove(), 500); // Remueve la capa visual
-            }).catch(e => {
-                console.log("Error al reproducir video:", e);
-            });
+                setTimeout(() => overlay.remove(), 500);
+            }
         }
 
         function cargarVoces() {
@@ -257,9 +262,7 @@
                             contenedor.classList.add('activar-alerta');
                             setTimeout(() => contenedor.classList.remove('activar-alerta'), 4000);
                             
-                            // 1. PAUSAR EL VIDEO AMBIENTAL AL LLAMAR AL TURNO
-                            videoFondo.pause();
-
+                            // SE REPRODUCE LA CAMPANA Y LA VOZ SIN TOCAR NI PAUSAR EL VIDEO DE FONDO
                             let audioCampana = document.getElementById('audio-campana');
                             audioCampana.currentTime = 0;
                             audioCampana.play().catch(e => console.log("Audio campana bloqueado:", e));
@@ -291,11 +294,6 @@
                                 if (vozHumana) {
                                     msg.voice = vozHumana;
                                 }
-
-                                // 2. REANUDAR EL VIDEO AMBIENTAL CUANDO TERMINE DE HABLAR LA VOZ SINTÉTICA
-                                msg.onend = function() {
-                                    videoFondo.play().catch(e => console.log("No se pudo reanudar el video automáticamente:", e));
-                                };
 
                                 window.speechSynthesis.speak(msg);
                             }, 800);

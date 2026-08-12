@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - GORE Cajamarca</title>
+    <title>Panel de Operador - GORE Cajamarca</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -87,22 +87,25 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
-        .cards-wrapper {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+        
+        /* Contenedor centrado para el panel individual del operador */
+        .panel-operador-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
         }
         .card {
             background: white;
-            padding: 20px 15px;
+            padding: 30px 25px;
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             text-align: center;
             border-top: 8px solid var(--azul-gore);
+            width: 100%;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: fit-content;
         }
         .card.preferencial-card {
             border-top: 8px solid var(--dorado-gore);
@@ -110,38 +113,44 @@
         .card h3 {
             color: var(--azul-gore);
             margin: 0 0 5px 0;
-            font-size: 1.1rem;
+            font-size: 1.4rem;
+        }
+        .card.preferencial-card h3 {
+            color: var(--dorado-gore);
         }
         .operador-tag {
             background: #eef3f9;
             color: var(--azul-gore);
-            padding: 4px 12px;
+            padding: 6px 16px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.95rem;
             font-weight: 700;
             display: inline-block;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
         }
         .turno-actual {
-            font-size: 3.8rem;
+            font-size: 5rem;
             font-weight: 800;
             color: var(--azul-gore);
-            margin: 5px 0;
+            margin: 10px 0;
             line-height: 1;
+        }
+        .card.preferencial-card .turno-actual {
+            color: #b08d47;
         }
         button {
             background: var(--azul-gore);
             color: white;
             border: none;
-            padding: 10px;
-            font-size: 0.9rem;
+            padding: 14px;
+            font-size: 1rem;
             font-weight: bold;
             border-radius: 10px;
             cursor: pointer;
             width: 100%;
             transition: background 0.2s, transform 0.1s;
             box-shadow: 0 4px 10px rgba(0,74,153,0.2);
-            margin-top: 8px;
+            margin-top: 10px;
         }
         button:hover {
             background: var(--azul-oscuro);
@@ -161,18 +170,18 @@
         .info-institucional {
             background: #f8fafc;
             border-radius: 8px;
-            padding: 8px 10px;
-            margin-top: 10px;
+            padding: 10px 12px;
+            margin-top: 15px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             border-left: 3px solid var(--dorado-gore);
             text-align: left;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.72rem;
+            font-size: 0.8rem;
         }
         .info-row span:first-child {
             color: #666;
@@ -233,13 +242,13 @@
     <header>
         <div class="header-title">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="GORE Cajamarca" class="logo-img">
-            <h2>Panel de Control de Turnos</h2>
+            <h2 id="header-titulo-operador">Panel de Control - Operador</h2>
         </div>
         <span id="reloj" style="font-weight: 600; font-size: 1.1rem;">00:00:00</span>
     </header>
 
     <div class="main-container">
-        <!-- Columna Izquierda: Estadísticas y Tarjetas de Ventanillas -->
+        <!-- Columna Izquierda: Panel exclusivo del operador en sesión -->
         <div class="columna-principal">
             <div class="stats-bar">
                 <div class="stat-card">
@@ -252,16 +261,18 @@
                 </div>
             </div>
 
-            <div class="cards-wrapper">
-                <!-- Ventanilla 01: Yajaira -->
-                <div class="card">
+            <div class="panel-operador-wrapper">
+                <!-- Tarjeta dinámica del operador actual -->
+                <div id="card-operador" class="card">
                     <div>
-                        <h3>VENTANILLA 01</h3>
-                        <div class="operador-tag">Yajaira</div>
-                        <div id="display-Ventanilla-01" class="turno-actual">0</div>
+                        <h3 id="lbl-ventanilla">VENTANILLA</h3>
+                        <div id="lbl-nombre" class="operador-tag">Operador</div>
+                        <div id="display-turno" class="turno-actual">0</div>
                     </div>
                     <div>
-                        <button onclick="llamarSiguiente('Ventanilla 01', 'normal')">Siguiente Turno 📢</button>
+                        <div id="botones-accion">
+                            <!-- Los botones se inyectan dinámicamente según el operador -->
+                        </div>
                         <div class="info-institucional">
                             <div class="info-row">
                                 <span>Entidad:</span>
@@ -270,59 +281,6 @@
                             <div class="info-row">
                                 <span>SECRETARIA GENERAL</span>
                                 <span>MESA PARTES</span>
-                            </div>
-                            <div class="info-row">
-                                <span>Conexión:</span>
-                                <span style="color: #28a745;">Sincronizado ⚡</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ventanilla 02: Sandra -->
-                <div class="card">
-                    <div>
-                        <h3>VENTANILLA 02</h3>
-                        <div class="operador-tag">Sandra</div>
-                        <div id="display-Ventanilla-02" class="turno-actual">0</div>
-                    </div>
-                    <div>
-                        <button onclick="llamarSiguiente('Ventanilla 02', 'normal')">Siguiente Turno 📢</button>
-                        <div class="info-institucional">
-                            <div class="info-row">
-                                <span>Entidad:</span>
-                                <span>GORE Cajamarca</span>
-                            </div>
-                            <div class="info-row">
-                                <span>SECRETARIA GENERAL</span>
-                                <span>MESA PARTES</span>
-                            </div>
-                            <div class="info-row">
-                                <span>Conexión:</span>
-                                <span style="color: #28a745;">Sincronizado ⚡</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ventanilla 03: Jhoe (Con Preferencial) -->
-                <div class="card preferencial-card">
-                    <div>
-                        <h3>VENTANILLA 03</h3>
-                        <div class="operador-tag">Jhoe</div>
-                        <div id="display-Ventanilla-03" class="turno-actual">0</div>
-                    </div>
-                    <div>
-                        <button onclick="llamarSiguiente('Ventanilla 03', 'normal')">Siguiente Turno 📢</button>
-                        <button class="btn-preferencial" onclick="llamarSiguiente('Ventanilla 03', 'preferencial')">Llamar Preferencial 🌟</button>
-                        <div class="info-institucional">
-                            <div class="info-row">
-                                <span>Entidad:</span>
-                                <span>GORE Cajamarca</span>
-                            </div>
-                            <div class="info-row">
-                                <span>SECRETARIA GENERAL</span>
-                                <span>PREFERENCIAL</span>
                             </div>
                             <div class="info-row">
                                 <span>Conexión:</span>
@@ -348,6 +306,40 @@
     </div>
 
     <script>
+        // Identificar qué operador está usando esta pantalla (inyectado desde Flask o leído de la URL)
+        // Ejemplo esperado de variable global o parámetro: operadorActual = 'Sandra', 'Yajaira' o 'Jhoe'
+        const operadorActual = "{{ operador|default('Sandra') }}"; 
+
+        // Configuración de los operadores
+        const datosConfig = {
+            "Sandra": { ventanilla: "Ventanilla 01", preferencial: false },
+            "Yajaira": { ventanilla: "Ventanilla 02", preferencial: false },
+            "Jhoe": { ventanilla: "Ventanilla 03", preferencial: true }
+        };
+
+        const config = datosConfig[operadorActual] || datosConfig["Sandra"];
+
+        document.getElementById('header-titulo-operador').innerText = `Panel de Control - ${operadorActual}`;
+        document.getElementById('lbl-ventanilla').innerText = config.ventanilla.toUpperCase();
+        document.getElementById('lbl-nombre').innerText = operadorActual;
+
+        if (config.preferencial) {
+            document.getElementById('card-operador').classList.add('preferencial-card');
+        }
+
+        // Construir los botones dinámicamente según el operador
+        let contenedorBotones = document.getElementById('botones-accion');
+        if (config.preferencial) {
+            contenedorBotones.innerHTML = `
+                <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢</button>
+                <button class="btn-preferencial" onclick="llamarSiguiente('${config.ventanilla}', 'preferencial')">Llamar Preferencial 🌟</button>
+            `;
+        } else {
+            contenedorBotones.innerHTML = `
+                <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢</button>
+            `;
+        }
+
         function actualizarReloj() {
             document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES');
         }
@@ -364,7 +356,7 @@
             let badgePref = esPreferencial ? ' <span style="color: #c5a059; font-weight: bold;">(🌟 Preferencial)</span>' : '';
             let itemHtml = `
                 <div class="item-historial">
-                    <div><strong>${ventanilla}</strong> &rarr; Turno #${turno}${badgePref}</div>
+                    <div><strong>${ventanilla} (${operadorActual})</strong> &rarr; Turno #${turno}${badgePref}</div>
                     <span style="color: #666; font-size: 0.75rem;">${horaActual}</span>
                 </div>
             `;
@@ -378,8 +370,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'ok') {
-                    let idElemento = "display-" + data.ventanilla.replace(" ", "-");
-                    let el = document.getElementById(idElemento);
+                    let el = document.getElementById('display-turno');
                     if (el) {
                         el.innerText = data.turno;
                     }
@@ -396,18 +387,16 @@
             });
         }
 
+        // Cargar el turno actual de su ventanilla al iniciar
         window.onload = function() {
             fetch('/obtener_todos_los_turnos')
                 .then(r => r.json())
                 .then(data => {
-                    Object.keys(data).forEach(nV => {
-                        let turno = data[nV];
-                        let idElemento = "display-" + nV.replace(" ", "-");
-                        let el = document.getElementById(idElemento);
-                        if (el && turno > 0) {
-                            el.innerText = turno;
-                        }
-                    });
+                    let turno = data[config.ventanilla];
+                    let el = document.getElementById('display-turno');
+                    if (el && turno > 0) {
+                        el.innerText = turno;
+                    }
                 });
         };
     </script>

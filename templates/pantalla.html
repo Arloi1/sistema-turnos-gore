@@ -21,7 +21,7 @@
         }
 
         .slider-container { 
-            width: 100%; height: 65vh; 
+            width: 100%; height: 50vh; 
             overflow: hidden; 
             position: relative; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -40,42 +40,46 @@
             flex-direction: column;
             justify-content: center; 
             align-items: center; 
-            padding-top: 10px; 
-            gap: 15px;
+            padding-top: 5px; 
+            gap: 10px;
         }
 
         #reloj {
-            font-size: 2.5rem; 
+            font-size: 2rem; 
             font-weight: 700; 
             color: var(--azul-gore);
         }
 
         .ventanillas-container { 
             display: flex; 
-            gap: 60px; 
+            gap: 30px; 
         }
 
         .ventanilla { 
             background: rgb(255, 255, 255); 
-            padding: 20px 100px; 
-            border-radius: 30px; 
+            padding: 15px 40px; 
+            border-radius: 25px; 
             text-align: center; 
-            box-shadow: 0 40px 50px rgba(0,0,0,0.15);
-            border-left: 20px solid var(--azul-gore); 
-            width: 450px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+            border-left: 15px solid var(--azul-gore); 
+            width: 320px;
             transition: all 0.3s ease;
+        }
+
+        .ventanilla.preferencial {
+            border-left: 15px solid var(--dorado-gore);
         }
 
         .titulo { 
             color: var(--dorado-gore); 
-            font-size: 1.6rem; 
+            font-size: 1.3rem; 
             font-weight: 800; 
-            letter-spacing: 4px; 
-            margin-bottom: 15px;
+            letter-spacing: 2px; 
+            margin-bottom: 10px;
         }
 
         .numero { 
-            font-size: 160px; 
+            font-size: 110px; 
             font-weight: 800; 
             color: var(--azul-gore); 
             margin: 0; 
@@ -95,7 +99,7 @@
 
         .footer-bar {
             width: 100%; 
-            height: 120px; 
+            height: 90px; 
             background: var(--azul-gore);
             display: flex; 
             align-items: center; 
@@ -103,7 +107,7 @@
         }
         
         .logo-img { 
-            height: 100px; 
+            height: 70px; 
             object-fit: contain; 
             filter: brightness(0) invert(1); 
         }
@@ -122,12 +126,16 @@
         
         <div class="ventanillas-container">
             <div class="ventanilla">
-                <div class="titulo">VENTANILLA NÚMERO 1</div>
+                <div class="titulo">VENTANILLA 01</div>
                 <div id="turno-Ventanilla-01" class="numero">0</div>
             </div>
             <div class="ventanilla">
-                <div class="titulo">VENTANILLA NÚMERO 2</div>
+                <div class="titulo">VENTANILLA 02</div>
                 <div id="turno-Ventanilla-02" class="numero">0</div>
+            </div>
+            <div class="ventanilla preferencial">
+                <div class="titulo">VENTANILLA 03 (PREF.)</div>
+                <div id="turno-Ventanilla-03" class="numero">0</div>
             </div>
         </div>
     </div>
@@ -139,10 +147,9 @@
     <audio id="audio-campana" src="{{ url_for('static', filename='campana.mp3') }}"></audio>
 
     <script>
-        let estadoActual = {"Ventanilla 1": -1, "Ventanilla 2": -1};
+        let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
         let vocesDisponibles = [];
 
-        // Cargar voces asegurando compatibilidad en navegadores
         function cargarVoces() {
             vocesDisponibles = window.speechSynthesis.getVoices();
         }
@@ -160,7 +167,9 @@
                         let turno = data[nV];
                         if (turno > 0) {
                             estadoActual[nV] = turno;
-                            document.getElementById("turno-" + nV.replace(" ", "-")).innerText = turno;
+                            let elementId = "turno-" + nV.replace(/ /g, "-");
+                            let el = document.getElementById(elementId);
+                            if (el) el.innerText = turno;
                         }
                     });
                 });
@@ -180,7 +189,9 @@
                         let turno = data[nV];
                         if (turno !== estadoActual[nV] && turno > 0) {
                             estadoActual[nV] = turno;
-                            let el = document.getElementById("turno-" + nV.replace(" ", "-"));
+                            let elementId = "turno-" + nV.replace(/ /g, "-");
+                            let el = document.getElementById(elementId);
+                            if (!el) return;
                             let contenedor = el.parentElement;
 
                             el.innerText = turno;
@@ -189,21 +200,27 @@
                             contenedor.classList.add('activar-alerta');
                             setTimeout(() => contenedor.classList.remove('activar-alerta'), 2000);
                             
-                            // Reproducir audio de campana y voz
+                            // Reproducir audio de campana
                             let audioCampana = document.getElementById('audio-campana');
                             audioCampana.currentTime = 0;
-                            audioCampana.play().catch(e => console.log("Audio bloqueado por políticas del navegador:", e));
+                            audioCampana.play().catch(e => console.log("Audio bloqueado:", e));
 
                             setTimeout(() => {
-                                window.speechSynthesis.cancel(); // Detener cualquier locución previa acumulada
+                                window.speechSynthesis.cancel(); 
                                 
-                                let textoLlamada = 'Turno ' + turno + ', por favor, acérquese a ' + nV;
+                                // Texto personalizado si es la ventanilla preferencial (Ventanilla 03)
+                                let textoLlamada = '';
+                                if (nV === "Ventanilla 03") {
+                                    textoLlamada = 'Turno número ' + turno + ', por favor, diríjase a la Ventanilla número 3 preferencial';
+                                } else {
+                                    textoLlamada = 'Turno ' + turno + ', por favor, acérquese a ' + nV;
+                                }
+
                                 let msg = new SpeechSynthesisUtterance(textoLlamada);
                                 msg.lang = 'es-ES';
                                 msg.rate = 0.85; 
                                 msg.pitch = 1.0; 
                                 
-                                // Buscar una voz en español de calidad si está disponible
                                 if (vocesDisponibles.length === 0) {
                                     vocesDisponibles = window.speechSynthesis.getVoices();
                                 }

@@ -132,7 +132,12 @@ def historial():
 
 @app.route('/obtener_todos_los_turnos', methods=['GET'])
 def obtener_todos(): 
-    return jsonify(estado_visual)
+    # Devolvemos tanto el turno como el estado preferencial del último ticket atendido
+    resultado = {}
+    for v in ["Ventanilla 01", "Ventanilla 02", "Ventanilla 03"]:
+        ultimo = HistorialAtencion.query.filter_by(ventanilla=v).order_by(HistorialAtencion.id.desc()).first()
+        resultado[v] = ultimo.turno if ultimo else 0
+    return jsonify(resultado)
 
 @app.route('/resetear_turnos', methods=['POST'])
 def resetear_turnos():

@@ -163,6 +163,27 @@ def index():
     tickets = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).all()
     return render_template('index.html', tickets=tickets)
 
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        dni = request.form.get('dni')
+        preferencial = True if request.form.get('preferencial') == 'on' else False
+        if dni:
+            max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
+            nuevo_turno = (max_t or 0) + 1
+            nuevo_ticket = Ticket(
+                dni=dni,
+                nombre="Ciudadano",
+                fecha_registro=datetime.now().strftime("%d/%m/%Y %H:%M"),
+                estado='ESPERA',
+                turno=nuevo_turno,
+                preferencial=preferencial
+            )
+            db.session.add(nuevo_ticket)
+            db.session.commit()
+            return render_template('registro.html', mensaje="¡Turno generado con éxito!")
+    return render_template('registro.html')
+
 @app.route('/control')
 def control(): 
     return render_template('control.html')

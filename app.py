@@ -189,9 +189,22 @@ def registro():
             return render_template('registro.html', mensaje="¡Turno generado con éxito!")
     return render_template('registro.html')
 
+# Rutas independientes actualizadas para el control por cada operador
 @app.route('/control')
-def control(): 
-    return render_template('control.html')
+def control_general(): 
+    return render_template('control.html', operador='Sandra')
+
+@app.route('/control/sandra')
+def control_sandra():
+    return render_template('control.html', operador='Sandra')
+
+@app.route('/control/yajaira')
+def control_yajaira():
+    return render_template('control.html', operador='Yajaira')
+
+@app.route('/control/jhoe')
+def control_jhoe():
+    return render_template('control.html', operador='Jhoe')
 
 @app.route('/pantalla')
 def pantalla(): 

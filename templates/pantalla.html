@@ -157,8 +157,8 @@
     </div>
 
     <div class="slider-container">
-        <video id="video-fondo" autoplay loop playsinline>
-            <source src="{{ url_for('static', filename='video1.mp4') }}" type="video/mp4">
+        <video id="video-fondo" autoplay playsinline>
+            <source id="source-video" src="" type="video/mp4">
         </video>
     </div>
 
@@ -191,7 +191,30 @@
         let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
         let vocesDisponibles = [];
         let sistemaIniciado = false;
+        
         const videoFondo = document.getElementById('video-fondo');
+        const sourceVideo = document.getElementById('source-video');
+        
+        // Lista de videos que se reproducirán secuencialmente (coloca tus archivos en la carpeta static)
+        const listaVideos = [
+            "{{ url_for('static', filename='video1.mp4') }}",
+            "{{ url_for('static', filename='video2.mp4') }}",
+            "{{ url_for('static', filename='video3.mp4') }}"
+        ];
+        
+        let indiceVideoActual = 0;
+
+        function reproducirVideoActual() {
+            sourceVideo.src = listaVideos[indiceVideoActual];
+            videoFondo.load();
+            videoFondo.play().catch(e => console.log("Video play error:", e));
+        }
+
+        // Al terminar un video, pasa automáticamente al siguiente de la lista en bucle
+        videoFondo.onended = function() {
+            indiceVideoActual = (indiceVideoActual + 1) % listaVideos.length;
+            reproducirVideoActual();
+        };
         
         const VOLUMEN_NORMAL = 0.8; // Volumen habitual del video
         const VOLUMEN_BAJO = 0.15;  // Volumen reducido cuando llama un turno
@@ -202,7 +225,7 @@
             sistemaIniciado = true;
 
             videoFondo.muted = false;
-            videoFondo.play().catch(e => console.log("Video play error:", e));
+            reproducirVideoActual(); // Inicia la reproducción del primer video
 
             const overlay = document.getElementById('overlay-inicio');
             if (overlay) {

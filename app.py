@@ -207,6 +207,23 @@ def control_yajaira():
 def control_jhoe():
     return render_template('control.html', operador='Jhoe')
 
+@app.route('/repetir_turno/<ventanilla>', methods=['POST'])
+def repetir_turno(ventanilla):
+    global estado_visual
+    v_nombre = unquote(ventanilla)
+    
+    if v_nombre in estado_visual:
+        turno_actual = estado_visual[v_nombre]
+        if turno_actual > 0:
+            # Forzamos un pequeño cambio o mandamos señal para que la pantalla lo repita
+            return jsonify({
+                "status": "ok", 
+                "ventanilla": v_nombre, 
+                "turno": turno_actual,
+                "repetir": True
+            })
+    return jsonify({"status": "error"}), 400
+
 @app.route('/pantalla')
 def pantalla(): 
     return render_template('pantalla.html')

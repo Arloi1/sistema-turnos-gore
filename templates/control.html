@@ -285,8 +285,8 @@
                                 <span>MESA PARTES</span>
                             </div>
                             <div class="info-row">
-                                <span>Conexión:</span>
-                                <span style="color: #28a745;">Sincronizado ⚡</span>
+                                <span>Atajos de Teclado:</span>
+                                <span style="color: var(--azul-gore); font-size: 0.75rem;">[+] Siguiente | [-] Repetir</span>
                             </div>
                         </div>
                     </div>
@@ -329,14 +329,14 @@
         let contenedorBotones = document.getElementById('botones-accion');
         if (config.preferencial) {
             contenedorBotones.innerHTML = `
-                <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢</button>
+                <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢 [+]</button>
                 <button class="btn-preferencial" onclick="llamarSiguiente('${config.ventanilla}', 'preferencial')">Llamar Preferencial 🌟</button>
-                <button class="btn-repetir" onclick="repetirTurno('${config.ventanilla}')">📢 Repetir Llamado</button>
+                <button class="btn-repetir" onclick="repetirTurno('${config.ventanilla}')">📢 Repetir Llamado [-]</button>
             `;
         } else {
             contenedorBotones.innerHTML = `
-                <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢</button>
-                <button class="btn-repetir" onclick="repetirTurno('${config.ventanilla}')">📢 Repetir Llamado</button>
+                <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢 [+]</button>
+                <button class="btn-repetir" onclick="repetirTurno('${config.ventanilla}')">📢 Repetir Llamado [-]</button>
             `;
         }
 
@@ -404,6 +404,22 @@
                 alert("Error de conexión al intentar repetir el turno.");
             });
         }
+
+        // --- ATAJOS DE TECLADO (+ y -) ---
+        document.addEventListener('keydown', function(event) {
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+
+            // Teclas Plus (+) o NumpadAdd (+), o el signo más directo
+            if (event.key === '+' || event.code === 'NumpidAdd' || event.key === '=') {
+                event.preventDefault();
+                llamarSiguiente(config.ventanilla, 'normal');
+            } 
+            // Teclas Minus (-) o NumpadSubtract (-)
+            else if (event.key === '-' || event.code === 'NumpadSubtract' || event.key === '_') {
+                event.preventDefault();
+                repetirTurno(config.ventanilla);
+            }
+        });
 
         window.onload = function() {
             fetch('/obtener_todos_los_turnos')

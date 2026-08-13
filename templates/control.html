@@ -165,6 +165,13 @@
         .btn-preferencial:hover {
             background: #b08d47;
         }
+        .btn-repetir {
+            background: #d97706;
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+        }
+        .btn-repetir:hover {
+            background: #b45309;
+        }
 
         .info-institucional {
             background: #f8fafc;
@@ -302,7 +309,7 @@
     <script>
         const operadorActual = "{{ operador|default('Sandra') }}"; 
 
-        // CONFIGURACIÓN CORREGIDA: Yajaira=Ventanilla 01, Sandra=Ventanilla 02, Jhoe=Ventanilla 03
+        // CONFIGURACIÓN: Yajaira=Ventanilla 01, Sandra=Ventanilla 02, Jhoe=Ventanilla 03
         const datosConfig = {
             "Yajaira": { ventanilla: "Ventanilla 01", preferencial: false },
             "Sandra": { ventanilla: "Ventanilla 02", preferencial: false },
@@ -324,10 +331,12 @@
             contenedorBotones.innerHTML = `
                 <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢</button>
                 <button class="btn-preferencial" onclick="llamarSiguiente('${config.ventanilla}', 'preferencial')">Llamar Preferencial 🌟</button>
+                <button class="btn-repetir" onclick="repetirTurno('${config.ventanilla}')">📢 Repetir Llamado</button>
             `;
         } else {
             contenedorBotones.innerHTML = `
                 <button onclick="llamarSiguiente('${config.ventanilla}', 'normal')">Siguiente Turno 📢</button>
+                <button class="btn-repetir" onclick="repetirTurno('${config.ventanilla}')">📢 Repetir Llamado</button>
             `;
         }
 
@@ -375,6 +384,24 @@
             .catch(error => {
                 console.error("Error en la petición:", error);
                 alert("Error de conexión con el servidor.");
+            });
+        }
+
+        function repetirTurno(ventanilla) {
+            fetch(`/repetir_turno/${encodeURIComponent(ventanilla)}`, {
+                method: 'POST'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    console.log("Repitiendo turno: " + data.turno);
+                } else {
+                    alert("No hay ningún turno activo para repetir en esta ventanilla.");
+                }
+            })
+            .catch(error => {
+                console.log("Error al repetir:", error);
+                alert("Error de conexión al intentar repetir el turno.");
             });
         }
 

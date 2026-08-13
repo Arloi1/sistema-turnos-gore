@@ -50,7 +50,6 @@ class HistorialAtencion(db.Model):
 
 with app.app_context():
     db.create_all()
-    # Solución automática para bases de datos existentes en Render que no tengan la columna preferencial
     try:
         db.session.execute(text('ALTER TABLE tickets ADD COLUMN IF NOT EXISTS preferencial BOOLEAN DEFAULT FALSE;'))
         db.session.commit()
@@ -67,13 +66,17 @@ def actualizar_turno(ventanilla):
         tipo = request.args.get('tipo', 'normal')
         
         ticket = None
-        # Si llaman preferencial, busca primero un ticket marcado como preferencial en espera
-        if tipo == 'preferencial':
-            ticket = Ticket.query.filter_by(estado="ESPERA", preferencial=True).order_by(Ticket.id.asc()).first()
         
-        # Si no hay preferencial o pidieron turno normal, toma el siguiente en orden estricto de llegada
-        if not ticket:
-            ticket = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).first()
+        # Lógica corregida: Ventanilla 03 (Jhoe) es la única que atiende preferenciales
+        if v_nombre == "Ventanilla 03":
+            if tipo == 'preferencial':
+                ticket = Ticket.query.filter_by(estado="ESPERA", preferencial=True).order_by(Ticket.id.asc()).first()
+            # Si no pidió preferencial o no hay, busca un normal
+            if not ticket:
+                ticket = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).first()
+        else:
+            # Ventanillas normales (01 y 02): Solo atienden tickets marcados como False
+            ticket = Ticket.query.filter_by(estado="ESPERA", preferencial=False).order_by(Ticket.id.asc()).first()
         
         if not ticket:
             return jsonify({"status": "vacio"}), 200
@@ -132,7 +135,6 @@ def historial():
 
 @app.route('/obtener_todos_los_turnos', methods=['GET'])
 def obtener_todos(): 
-    # Devolvemos tanto el turno como el estado preferencial del último ticket atendido
     resultado = {}
     for v in ["Ventanilla 01", "Ventanilla 02", "Ventanilla 03"]:
         ultimo = HistorialAtencion.query.filter_by(ventanilla=v).order_by(HistorialAtencion.id.desc()).first()
@@ -189,7 +191,6 @@ def registro():
             return render_template('registro.html', mensaje="¡Turno generado con éxito!")
     return render_template('registro.html')
 
-# Rutas independientes actualizadas para el control por cada operador
 @app.route('/control')
 def control_general(): 
     return render_template('control.html', operador='Sandra')

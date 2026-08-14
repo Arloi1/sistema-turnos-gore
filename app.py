@@ -64,18 +64,15 @@ def actualizar_turno(ventanilla):
     
     if v_nombre in estado_visual:
         tipo = request.args.get('tipo', 'normal')
-        
         ticket = None
         
         # Lógica corregida: Ventanilla 03 (Jhoe) es la única que atiende preferenciales
         if v_nombre == "Ventanilla 03":
             if tipo == 'preferencial':
                 ticket = Ticket.query.filter_by(estado="ESPERA", preferencial=True).order_by(Ticket.id.asc()).first()
-            # Si no pidió preferencial o no hay, busca un normal
             if not ticket:
                 ticket = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).first()
         else:
-            # Ventanillas normales (01 y 02): Solo atienden tickets marcados como False
             ticket = Ticket.query.filter_by(estado="ESPERA", preferencial=False).order_by(Ticket.id.asc()).first()
         
         if not ticket:
@@ -94,6 +91,7 @@ def actualizar_turno(ventanilla):
         )
         db.session.add(nuevo_historial)
         
+        # Actualizamos el estado visual en memoria para que sepa cuál es el último turno activo
         estado_visual[v_nombre] = turno_real
         db.session.commit()
         
@@ -214,15 +212,23 @@ def repetir_turno(ventanilla):
     
     if v_nombre in estado_visual:
         turno_actual = estado_visual[v_nombre]
+        
+        # Si el diccionario en memoria está en 0, buscamos el último en el historial de la base de datos
+        if turno_actual == 0:
+            ultimo_historial = HistorialAtencion.query.filter_by(ventanilla=v_nombre).order_by(HistorialAtencion.id.desc()).first()
+            if ultimo_historial:
+                turno_actual = ultimo_historial.turno
+                estado_visual[v_nombre] = turno_actual
+
         if turno_actual > 0:
-            # Forzamos un pequeño cambio o mandamos señal para que la pantalla lo repita
             return jsonify({
                 "status": "ok", 
                 "ventanilla": v_nombre, 
                 "turno": turno_actual,
                 "repetir": True
             })
-    return jsonify({"status": "error"}), 400
+            
+    return jsonify({"status": "error", "mensaje": "No hay ningún turno activo para repetir en esta ventanilla."}), 400
 
 @app.route('/pantalla')
 def pantalla(): 

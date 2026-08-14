@@ -27,7 +27,6 @@
             overflow: hidden;
         }
 
-        /* Video maximizado ocupando todo el espacio superior sin barra inferior */
         .slider-container { 
             width: 100%; 
             flex: 1; 
@@ -43,7 +42,6 @@
             object-position: center top;
         }
         
-        /* Reloj como marca de agua en la esquina superior izquierda del video */
         #reloj {
             position: absolute;
             top: 25px;
@@ -61,7 +59,6 @@
             z-index: 10;
         }
 
-        /* Contenedor de ventanillas abajo al límite */
         .turnos-wrapper { 
             width: 100%;
             display: flex; 
@@ -97,7 +94,6 @@
             align-items: center;
         }
 
-        /* Bordes superiores y colores solicitados */
         .ventanilla.v1 { border-top: 8px solid var(--rojo-ventanilla); }
         .ventanilla.v2 { border-top: 8px solid var(--verde-ventanilla); }
         .ventanilla.v3 { border-top: 8px solid var(--azul-ventanilla); }
@@ -167,17 +163,14 @@
 
     <div class="turnos-wrapper">
         <div class="ventanillas-container">
-            <!-- Ventanilla 01 (ROJO) -->
             <div class="ventanilla v1" id="card-Ventanilla 01">
                 <div class="titulo">VENTANILLA 01</div>
                 <div id="turno-Ventanilla-01" class="numero">0</div>
             </div>
-            <!-- Ventanilla 02 (VERDE) -->
             <div class="ventanilla v2" id="card-Ventanilla 02">
                 <div class="titulo">VENTANILLA 02</div>
                 <div id="turno-Ventanilla-02" class="numero">0</div>
             </div>
-            <!-- Ventanilla 03 (AZUL - PREFERENCIAL) -->
             <div class="ventanilla v3" id="card-Ventanilla 03">
                 <div class="titulo">VENTANILLA 03 (PREFERENCIAL)</div>
                 <div id="turno-Ventanilla-03" class="numero">0</div>
@@ -188,8 +181,7 @@
     <audio id="audio-campana" src="{{ url_for('static', filename='campana.mp3') }}"></audio>
 
     <script>
-        let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
-        let ultimosTimestamps = {"Ventanilla 01": 0, "Ventanilla 02": 0, "Ventanilla 03": 0};
+        let estadoActual = {"Ventanilla 01": {turno: -1, lastUpdate: 0}, "Ventanilla 02": {turno: -1, lastUpdate: 0}, "Ventanilla 03": {turno: -1, lastUpdate: 0}};
         let vocesDisponibles = [];
         let sistemaIniciado = false;
         
@@ -249,7 +241,7 @@
                     Object.keys(data).forEach(nV => {
                         let turno = data[nV];
                         if (turno > 0) {
-                            estadoActual[nV] = turno;
+                            estadoActual[nV].turno = turno;
                             let elementId = "turno-" + nV.replace(/ /g, "-");
                             let el = document.getElementById(elementId);
                             if (el) el.innerText = turno;
@@ -278,11 +270,11 @@
                             let cardId = "card-" + nV;
                             let contenedor = document.getElementById(cardId);
 
-                            // Detectar cambio de turno O si se forzó repetición por timestamp/estado
-                            if (turno !== estadoActual[nV]) {
-                                estadoActual[nV] = turno;
+                            // Si cambia el número O si forzamos repetición detectando un cambio en backend
+                            if (turno !== estadoActual[nV].turno) {
+                                estadoActual[nV].turno = turno;
+                                estadoActual[nV].lastUpdate = Date.now();
                                 el.innerText = turno;
-                                
                                 dispararAlertaYAudio(nV, turno, contenedor);
                             }
                         }
@@ -342,7 +334,7 @@
             }, 800);
         }
 
-        setInterval(verificarTurnos, 2000);
+        setInterval(verificarTurnos, 1500);
     </script>
 </body>
 </html>

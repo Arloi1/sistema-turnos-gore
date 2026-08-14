@@ -55,7 +55,7 @@
             width: 100%;
             box-sizing: border-box;
             display: grid;
-            grid-template-columns: 2.5fr 1fr;
+            grid-template-columns: 2.2fr 1.2fr;
             gap: 20px;
             overflow: hidden;
         }
@@ -91,11 +91,11 @@
         .panel-operador-wrapper {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         .card {
             background: white;
-            padding: 30px 25px;
+            padding: 25px 20px;
             border-radius: 16px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             text-align: center;
@@ -112,7 +112,7 @@
         .card h3 {
             color: var(--azul-gore);
             margin: 0 0 5px 0;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
         }
         .card.preferencial-card h3 {
             color: var(--dorado-gore);
@@ -120,18 +120,18 @@
         .operador-tag {
             background: #eef3f9;
             color: var(--azul-gore);
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
             display: inline-block;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .turno-actual {
-            font-size: 5rem;
+            font-size: 4.2rem;
             font-weight: 800;
             color: var(--azul-gore);
-            margin: 10px 0;
+            margin: 5px 0;
             line-height: 1;
         }
         .card.preferencial-card .turno-actual {
@@ -141,15 +141,15 @@
             background: var(--azul-gore);
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 1rem;
+            padding: 12px;
+            font-size: 0.95rem;
             font-weight: bold;
             border-radius: 10px;
             cursor: pointer;
             width: 100%;
             transition: background 0.2s, transform 0.1s;
             box-shadow: 0 4px 10px rgba(0,74,153,0.2);
-            margin-top: 10px;
+            margin-top: 8px;
         }
         button:hover {
             background: var(--azul-oscuro);
@@ -176,18 +176,18 @@
         .info-institucional {
             background: #f8fafc;
             border-radius: 8px;
-            padding: 10px 12px;
-            margin-top: 15px;
+            padding: 8px 10px;
+            margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             border-left: 3px solid var(--dorado-gore);
             text-align: left;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         .info-row span:first-child {
             color: #666;
@@ -201,41 +201,77 @@
         .columna-lateral {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
             height: calc(100vh - 110px);
         }
         .panel-lateral {
             background: white;
             border-radius: 16px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             display: flex;
             flex-direction: column;
             flex: 1;
-            border-right: 6px solid var(--azul-gore);
             overflow: hidden;
         }
+        .panel-lateral.espera { border-right: 6px solid var(--azul-gore); }
+        .panel-lateral.archivados { border-right: 6px solid #d9534f; }
+
         .panel-lateral h4 {
             color: var(--azul-gore);
             margin-top: 0;
-            font-size: 1.1rem;
+            font-size: 1rem;
             border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .historial-llamadas {
+        .badge-contador {
+            background: #eef3f9;
+            color: var(--azul-gore);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+        .lista-scroll {
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            padding-right: 2px;
+        }
+        .item-cola {
+            background: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--azul-gore);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .item-archivado {
+            background: #fff5f5;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border-left: 4px solid #d9534f;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #c53030;
+            font-weight: 600;
         }
         .item-historial {
             background: #f8fafc;
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
             border-left: 4px solid var(--dorado-gore);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -257,11 +293,11 @@
             <div class="stats-bar">
                 <div class="stat-card">
                     <span>ESTADO DEL SISTEMA</span>
-                    <strong style="color: #28a745; font-size: 1rem;">● EN LÍNEA</strong>
+                    <strong style="color: #28a745; font-size: 0.9rem;">● EN LÍNEA</strong>
                 </div>
                 <div class="stat-card">
                     <span>PANTALLA EXTERNA</span>
-                    <button onclick="window.open('/pantalla', '_blank')" style="padding: 6px 12px; font-size: 0.85rem; width: auto; margin: 0;">Abrir TV 📺</button>
+                    <button onclick="window.open('/pantalla', '_blank')" style="padding: 5px 10px; font-size: 0.8rem; width: auto; margin: 0;">Abrir TV 📺</button>
                 </div>
             </div>
 
@@ -273,20 +309,19 @@
                         <div id="display-turno" class="turno-actual">0</div>
                     </div>
                     <div>
-                        <div id="botones-accion">
-                        </div>
+                        <div id="botones-accion"></div>
                         <div class="info-institucional">
                             <div class="info-row">
                                 <span>Entidad:</span>
                                 <span>GORE Cajamarca</span>
                             </div>
                             <div class="info-row">
-                                <span>SECRETARIA GENERAL</span>
-                                <span>MESA PARTES</span>
+                                <span>Área:</span>
+                                <span>SECRETARIA GENERAL - MESA PARTES</span>
                             </div>
                             <div class="info-row">
-                                <span>Atajos de Teclado:</span>
-                                <span style="color: var(--azul-gore); font-size: 0.75rem;">[+] Siguiente | [-] Repetir</span>
+                                <span>Atajos Teclado:</span>
+                                <span style="color: var(--azul-gore);">[+] Siguiente | [-] Repetir (3x = Archivar)</span>
                             </div>
                         </div>
                     </div>
@@ -295,12 +330,19 @@
         </div>
 
         <div class="columna-lateral">
-            <div class="panel-lateral">
-                <h4>Últimos Llamados 📋</h4>
-                <div id="lista-historial" class="historial-llamadas">
-                    <div style="color: #888; text-align: center; margin-top: 40px; font-size: 0.85rem;">
-                        Aún no hay llamadas registradas en esta sesión.
-                    </div>
+            <!-- Barra 1: Cola en Espera -->
+            <div class="panel-lateral espera">
+                <h4>Tickets en Espera <span id="contador-espera" class="badge-contador">0</span></h4>
+                <div id="lista-espera" class="lista-scroll">
+                    <div style="color: #888; text-align: center; margin-top: 20px; font-size: 0.8rem;">No hay tickets en espera.</div>
+                </div>
+            </div>
+
+            <!-- Barra 2: Tickets Archivados / No atendidos -->
+            <div class="panel-lateral archivados">
+                <h4>Tickets Archivados (3 Llamados) <span id="contador-archivados" class="badge-contador">0</span></h4>
+                <div id="lista-archivados" class="lista-scroll">
+                    <div style="color: #888; text-align: center; margin-top: 20px; font-size: 0.8rem;">No hay tickets archivados.</div>
                 </div>
             </div>
         </div>
@@ -309,7 +351,6 @@
     <script>
         const operadorActual = "{{ operador|default('Sandra') }}"; 
 
-        // CONFIGURACIÓN: Yajaira=Ventanilla 01, Sandra=Ventanilla 02, Jhoe=Ventanilla 03
         const datosConfig = {
             "Yajaira": { ventanilla: "Ventanilla 01", preferencial: false },
             "Sandra": { ventanilla: "Ventanilla 02", preferencial: false },
@@ -346,21 +387,50 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        function registrarActividad(ventanilla, turno, esPreferencial) {
-            let contenedor = document.getElementById('lista-historial');
-            if (contenedor.innerHTML.includes("Aún no hay llamadas")) {
-                contenedor.innerHTML = "";
-            }
-            
-            let horaActual = new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-            let badgePref = esPreferencial ? ' <span style="color: #c5a059; font-weight: bold;">(🌟 Preferencial)</span>' : '';
-            let itemHtml = `
-                <div class="item-historial">
-                    <div><strong>${ventanilla} (${operadorActual})</strong> &rarr; Turno #${turno}${badgePref}</div>
-                    <span style="color: #666; font-size: 0.75rem;">${horaActual}</span>
-                </div>
-            `;
-            contenedor.insertAdjacentHTML('afterbegin', itemHtml);
+        // Sincronizar datos de colas, turnos y archivados con el backend
+        function actualizarDatosPanel() {
+            fetch('/obtener_estado_colas?ventanilla=' + encodeURIComponent(config.ventanilla))
+                .then(r => r.json())
+                .then(data => {
+                    // Actualizar turno actual en pantalla si aplica
+                    if (data.turno_actual) {
+                        let el = document.getElementById('display-turno');
+                        if (el && data.turno_actual > 0) el.innerText = data.turno_actual;
+                    }
+
+                    // Renderizar Cola de Espera
+                    let contenedorEspera = document.getElementById('lista-espera');
+                    let badgeEspera = document.getElementById('contador-espera');
+                    if (data.cola_espera && data.cola_espera.length > 0) {
+                        badgeEspera.innerText = data.cola_espera.length;
+                        contenedorEspera.innerHTML = data.cola_espera.map(t => `
+                            <div class="item-cola">
+                                <span>Ticket #${t}</span>
+                                <span style="font-size:0.75rem; color:#666;">En espera</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        badgeEspera.innerText = "0";
+                        contenedorEspera.innerHTML = `<div style="color: #888; text-align: center; margin-top: 20px; font-size: 0.8rem;">No hay tickets en espera.</div>`;
+                    }
+
+                    // Renderizar Cola de Archivados (No atendidos tras 3 llamados)
+                    let contenedorArchivados = document.getElementById('lista-archivados');
+                    let badgeArchivados = document.getElementById('contador-archivados');
+                    if (data.cola_archivados && data.cola_archivados.length > 0) {
+                        badgeArchivados.innerText = data.cola_archivados.length;
+                        contenedorArchivados.innerHTML = data.cola_archivados.map(t => `
+                            <div class="item-archivado">
+                                <span>Ticket #${t}</span>
+                                <span style="font-size:0.75rem; background:#fee2e2; padding:2px 6px; border-radius:4px;">Archivado (3x)</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        badgeArchivados.innerText = "0";
+                        contenedorArchivados.innerHTML = `<div style="color: #888; text-align: center; margin-top: 20px; font-size: 0.8rem;">No hay tickets archivados.</div>`;
+                    }
+                })
+                .catch(err => console.error("Error sincronizando colas:", err));
         }
 
         function llamarSiguiente(ventanilla, tipo = 'normal') {
@@ -371,71 +441,56 @@
             .then(data => {
                 if (data.status === 'ok') {
                     let el = document.getElementById('display-turno');
-                    if (el) {
-                        el.innerText = data.turno;
-                    }
-                    registrarActividad(data.ventanilla, data.turno, data.es_preferencial);
+                    if (el) el.innerText = data.turno;
+                    actualizarDatosPanel();
                 } else if (data.status === 'vacio') {
                     alert("No hay ciudadanos en espera.");
                 } else {
                     alert("Error: " + (data.mensaje || "Desconocido"));
                 }
             })
-            .catch(error => {
-                console.error("Error en la petición:", error);
-                alert("Error de conexión con el servidor.");
-            });
+            .catch(error => console.error("Error en la petición:", error));
         }
 
-      function repetirTurno(ventanilla) {
+        function repetirTurno(ventanilla) {
             fetch(`/repetir_turno/${encodeURIComponent(ventanilla)}`, {
                 method: 'POST'
             })
             .then(async r => {
                 const data = await r.json();
                 if (r.ok && data.status === "ok") {
-                    console.log("Turno repetido con éxito: " + data.turno);
-                    // Opcional: puedes hacer parpadear el número en pantalla para dar feedback visual
                     let el = document.getElementById('display-turno');
                     if (el) {
                         el.style.transform = "scale(1.1)";
                         setTimeout(() => el.style.transform = "scale(1)", 200);
                     }
+                    if (data.archivado) {
+                        alert("El ticket alcanzó los 3 llamados y se ha archivado automáticamente. Pasando al siguiente.");
+                    }
+                    actualizarDatosPanel();
                 } else {
                     alert("Aviso: " + (data.mensaje || "No hay ningún turno activo para repetir en esta ventanilla."));
                 }
             })
-            .catch(error => {
-                console.error("Error al repetir:", error);
-                alert("Error de conexión al intentar repetir el turno con el servidor.");
-            });
+            .catch(error => console.error("Error al repetir:", error));
         }
-        // --- ATAJOS DE TECLADO (+ y -) ---
+
+        // Atajos de teclado (+ y -)
         document.addEventListener('keydown', function(event) {
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
 
-            // Teclas Plus (+) o NumpadAdd (+), o el signo más directo
-            if (event.key === '+' || event.code === 'NumpidAdd' || event.key === '=') {
+            if (event.key === '+' || event.code === 'NumpadAdd' || event.key === '=') {
                 event.preventDefault();
                 llamarSiguiente(config.ventanilla, 'normal');
-            } 
-            // Teclas Minus (-) o NumpadSubtract (-)
-            else if (event.key === '-' || event.code === 'NumpadSubtract' || event.key === '_') {
+            } else if (event.key === '-' || event.code === 'NumpadSubtract' || event.key === '_') {
                 event.preventDefault();
                 repetirTurno(config.ventanilla);
             }
         });
 
         window.onload = function() {
-            fetch('/obtener_todos_los_turnos')
-                .then(r => r.json())
-                .then(data => {
-                    let turno = data[config.ventanilla];
-                    let el = document.getElementById('display-turno');
-                    if (el && turno > 0) {
-                        el.innerText = turno;
-                    }
-                });
+            actualizarDatosPanel();
+            setInterval(actualizarDatosPanel, 2000); // Sincronización continua de colas
         };
     </script>
 </body>

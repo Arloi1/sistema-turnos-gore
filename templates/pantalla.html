@@ -2,335 +2,210 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Atención - GORE Cajamarca</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla de Turnos - GORE Cajamarca</title>
     <style>
-        :root {
-            --azul-gore: #003366;
-            --azul-claro-gore: #004a99;
-            --dorado-gore: #c5a059;
-            --fondo-gris: #eef2f7;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            background: var(--fondo-gris); 
-            display: flex; 
-            flex-direction: column; 
+        body, html {
+            width: 100%;
             height: 100vh;
+            background-color: #0b192c;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Contenedor del video ocupando el espacio superior disponible */
+        .video-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            background: #000;
             overflow: hidden;
         }
 
-        .slider-container { 
-            width: 100%; 
-            height: 52vh; 
-            overflow: hidden; 
-            position: relative; 
-            background-color: #000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Amplía el video cubriendo todo el espacio sin cortes extraños */
+            object-position: center top; /* Asegura que se vea la parte superior */
         }
 
-        #video-fondo {
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-        }
-        
-        .turnos-wrapper { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            padding: 5px 20px; 
-            gap: 10px;
-        }
-
-        #reloj {
-            font-size: 2rem; 
-            font-weight: 800; 
-            color: var(--azul-gore);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 2px 20px;
-            border-radius: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        /* Reloj como marca de agua en la esquina superior izquierda del video */
+        .reloj-marca-agua {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 12px;
             letter-spacing: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .ventanillas-container { 
+        /* Panel inferior de ventanillas maximizado hacia abajo */
+        .ventanillas-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            width: 95%;
-            max-width: 1400px;
+            gap: 20px;
+            padding: 20px 30px;
+            background-color: #f4f6f9;
+            width: 100%;
+            box-shadow: 0 -8px 25px rgba(0,0,0,0.2);
+            z-index: 5;
         }
 
-        .ventanilla { 
-            background: #ffffff; 
-            padding: 15px 20px; 
-            border-radius: 20px; 
-            text-align: center; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-            border-top: 6px solid var(--azul-claro-gore); 
-            border-left: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ventanilla.preferencial {
-            border-top: 6px solid var(--dorado-gore);
-        }
-
-        .titulo { 
-            color: var(--azul-gore); 
-            font-size: 1.1rem; 
-            font-weight: 800; 
-            letter-spacing: 1.5px; 
-            margin-bottom: 5px;
-        }
-
-        .ventanilla.preferencial .titulo {
-            color: var(--dorado-gore);
-        }
-
-        .numero { 
-            font-size: min(11vw, 110px); 
-            font-weight: 900; 
-            color: var(--azul-claro-gore); 
-            margin: 0; 
-            line-height: 1.1;
-        }
-
-        .ventanilla.preferencial .numero {
-            color: #b38f45;
-        }
-
-        @keyframes pulsoCard {
-            0% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
-            50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(197, 160, 89, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
-        }
-
-        .activar-alerta {
-            animation: pulsoCard 1.5s ease-in-out infinite;
-        }
-
-        .footer-bar {
-            width: 100%; 
-            height: 75px; 
-            background: var(--azul-gore);
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            box-shadow: -4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .logo-img { 
-            height: 50px; 
-            object-fit: contain; 
-            filter: brightness(0) invert(1); 
-        }
-
-        #overlay-inicio {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+        .ventanilla-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 15px 10px;
+            text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            color: white;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: opacity 0.5s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border-top: 8px solid #ccc;
+            transition: all 0.3s ease;
+        }
+
+        /* Colores personalizados solicitados */
+        .card-v1 { border-top-color: #d9534f; } /* Rojo */
+        .card-v2 { border-top-color: #5cb85c; } /* Verde */
+        .card-v3 { border-top-color: #0275d8; } /* Azul */
+
+        .ventanilla-titulo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #333333;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .ventanilla-numero {
+            font-size: 6.5rem;
+            font-weight: 900;
+            line-height: 1;
+            color: #111111;
+        }
+
+        /* Colores de los números acorde a su ventanilla */
+        .card-v1 .ventanilla-numero { color: #d9534f; }
+        .card-v2 .ventanilla-numero { color: #4cae4c; }
+        .card-v3 .ventanilla-numero { color: #0275d8; }
+
+        /* Animación de alerta al llamar o repetir turno */
+        @keyframes parpadear {
+            0% { transform: scale(1); background-color: #ffffff; }
+            50% { transform: scale(1.03); background-color: #fff3cd; }
+            100% { transform: scale(1); background-color: #ffffff; }
+        }
+
+        .alerta-llamada {
+            animation: parpadear 0.8s ease-in-out 3;
         }
     </style>
 </head>
-<body onclick="iniciarSistemaUnico()">
+<body>
 
-    <div id="overlay-inicio">
-        <h2 style="color: #c5a059; margin-bottom: 10px;">SISTEMA DE ATENCIÓN - GORE CAJAMARCA</h2>
-        <p style="font-size: 1.2rem;">Haz clic en cualquier lugar para iniciar la pantalla con audio y video</p>
-    </div>
-
-    <div class="slider-container">
-        <video id="video-fondo" autoplay playsinline>
-            <source id="source-video" src="" type="video/mp4">
+    <!-- Video institucional con el reloj flotando arriba a la izquierda -->
+    <div class="video-container">
+        <div id="reloj" class="reloj-marca-agua">00:00:00</div>
+        <!-- Asegúrate de colocar tu video en la carpeta static/ u o ruta correspondiente -->
+        <video autoplay muted loop id="video-institucional">
+            <source src="{{ url_for('static', filename='video.mp4') }}" type="video/mp4">
+            Tu navegador no soporta la reproducción de video.
         </video>
     </div>
 
-    <div class="turnos-wrapper">
-        <div id="reloj">00:00:00</div>
-        
-        <div class="ventanillas-container">
-            <div class="ventanilla">
-                <div class="titulo">VENTANILLA 01</div>
-                <div id="turno-Ventanilla-01" class="numero">0</div>
-            </div>
-            <div class="ventanilla">
-                <div class="titulo">VENTANILLA 02</div>
-                <div id="turno-Ventanilla-02" class="numero">0</div>
-            </div>
-            <div class="ventanilla preferencial">
-                <div class="titulo">VENTANILLA 03 (PREFERENCIAL)</div>
-                <div id="turno-Ventanilla-03" class="numero">0</div>
-            </div>
+    <!-- Sección inferior de tarjetas de turnos -->
+    <div class="ventanillas-grid">
+        <!-- Ventanilla 01 (ROJO) -->
+        <div class="ventanilla-card card-v1" id="card-Ventanilla 01">
+            <div class="ventanilla-titulo">Ventanilla 01</div>
+            <div class="ventanilla-numero" id="turno-Ventanilla 01">0</div>
         </div>
-    </div>
 
-    <div class="footer-bar">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="GORE Cajamarca" class="logo-img">
+        <!-- Ventanilla 02 (VERDE) -->
+        <div class="ventanilla-card card-v2" id="card-Ventanilla 02">
+            <div class="ventanilla-titulo">Ventanilla 02</div>
+            <div class="ventanilla-numero" id="turno-Ventanilla 02">0</div>
+        </div>
+
+        <!-- Ventanilla 03 (AZUL - PREFERENCIAL) -->
+        <div class="ventanilla-card card-v3" id="card-Ventanilla 03">
+            <div class="ventanilla-titulo">Ventanilla 03</div>
+            <div class="ventanilla-numero" id="turno-Ventanilla 03">0</div>
+        </div>
     </div>
 
     <audio id="audio-campana" src="{{ url_for('static', filename='campana.mp3') }}"></audio>
 
     <script>
-        let estadoActual = {"Ventanilla 01": -1, "Ventanilla 02": -1, "Ventanilla 03": -1};
-        let vocesDisponibles = [];
-        let sistemaIniciado = false;
-        
-        const videoFondo = document.getElementById('video-fondo');
-        const sourceVideo = document.getElementById('source-video');
-        
-        // Lista de videos que se reproducirán secuencialmente (coloca tus archivos en la carpeta static)
-        const listaVideos = [
-            "{{ url_for('static', filename='video1.mp4') }}",
-            "{{ url_for('static', filename='video2.mp4') }}",
-            "{{ url_for('static', filename='video3.mp4') }}"
-        ];
-        
-        let indiceVideoActual = 0;
-
-        function reproducirVideoActual() {
-            sourceVideo.src = listaVideos[indiceVideoActual];
-            videoFondo.load();
-            videoFondo.play().catch(e => console.log("Video play error:", e));
-        }
-
-        // Al terminar un video, pasa automáticamente al siguiente de la lista en bucle
-        videoFondo.onended = function() {
-            indiceVideoActual = (indiceVideoActual + 1) % listaVideos.length;
-            reproducirVideoActual();
-        };
-        
-        const VOLUMEN_NORMAL = 0.8; // Volumen habitual del video
-        const VOLUMEN_BAJO = 0.15;  // Volumen reducido cuando llama un turno
-        videoFondo.volume = VOLUMEN_NORMAL;
-
-        function iniciarSistemaUnico() {
-            if (sistemaIniciado) return;
-            sistemaIniciado = true;
-
-            videoFondo.muted = false;
-            reproducirVideoActual(); // Inicia la reproducción del primer video
-
-            const overlay = document.getElementById('overlay-inicio');
-            if (overlay) {
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.remove(), 500);
-            }
-        }
-
-        function cargarVoces() {
-            vocesDisponibles = window.speechSynthesis.getVoices();
-        }
-
-        cargarVoces();
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-            window.speechSynthesis.onvoiceschanged = cargarVoces;
-        }
-
-        window.onload = function() {
-            fetch('/obtener_todos_los_turnos')
-                .then(r => r.json())
-                .then(data => {
-                    Object.keys(data).forEach(nV => {
-                        let turno = data[nV];
-                        if (turno > 0) {
-                            estadoActual[nV] = turno;
-                            let elementId = "turno-" + nV.replace(/ /g, "-");
-                            let el = document.getElementById(elementId);
-                            if (el) el.innerText = turno;
-                        }
-                    });
-                });
-        };
-
+        // Actualizar reloj en tiempo real
         function actualizarReloj() {
-            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            document.getElementById('reloj').innerText = new Date().toLocaleTimeString('es-ES', options);
+            const ahora = new Date();
+            document.getElementById('reloj').innerText = ahora.toLocaleTimeString();
         }
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
+        // Control de turnos y detección de repeticiones
+        let ultimosTurnos = {
+            "Ventanilla 01": { turno: 0, ts: 0 },
+            "Ventanilla 02": { turno: 0, ts: 0 },
+            "Ventanilla 03": { turno: 0, ts: 0 }
+        };
+
         function verificarTurnos() {
-            fetch('/obtener_todos_los_turnos?t=' + new Date().getTime())
-                .then(r => r.json())
+            fetch('/obtener_todos_los_turnos')
+                .then(response => response.json())
                 .then(data => {
-                    Object.keys(data).forEach(nV => {
-                        let turno = data[nV];
-                        if (turno !== estadoActual[nV] && turno > 0) {
-                            estadoActual[nV] = turno;
-                            let elementId = "turno-" + nV.replace(/ /g, "-");
-                            let el = document.getElementById(elementId);
-                            if (!el) return;
-                            let contenedor = el.closest('.ventanilla');
-
-                            el.innerText = turno;
-                            
-                            contenedor.classList.add('activar-alerta');
-                            setTimeout(() => contenedor.classList.remove('activar-alerta'), 4000);
-                            
-                            // 1. BAJAR EL VOLUMEN DEL VIDEO SUAVEMENTE AL LLAMAR
-                            videoFondo.volume = VOLUMEN_BAJO;
-
-                            let audioCampana = document.getElementById('audio-campana');
-                            audioCampana.currentTime = 0;
-                            audioCampana.play().catch(e => console.log("Audio campana bloqueado:", e));
-
-                            setTimeout(() => {
-                                window.speechSynthesis.cancel(); 
+                    for (const [ventanilla, turno] of Object.entries(data)) {
+                        const elementoTurno = document.getElementById(`turno-${ventanilla}`);
+                        const tarjeta = document.getElementById(`card-${ventanilla}`);
+                        
+                        if (elementoTurno && turno > 0) {
+                            if (ultimosTurnos[ventanilla].turno !== turno) {
+                                elementoTurno.innerText = turno;
+                                ultimosTurnos[ventanilla].turno = turno;
                                 
-                                let textoLlamada = '';
-                                if (nV === "Ventanilla 03") {
-                                    textoLlamada = 'Turno número ' + turno + ', por favor, diríjase a la Ventanilla número 3 preferencial';
-                                } else {
-                                    textoLlamada = 'Turno ' + turno + ', por favor, acérquese a ' + nV;
-                                }
-
-                                let msg = new SpeechSynthesisUtterance(textoLlamada);
-                                msg.lang = 'es-ES';
-                                msg.rate = 0.85; 
-                                msg.pitch = 1.0; 
+                                // Lanzar animación y sonido de llamada
+                                tarjeta.classList.remove('alerta-llamada');
+                                void tarjeta.offsetWidth; // Forzar reflow para reiniciar animación
+                                tarjeta.classList.add('alerta-llamada');
                                 
-                                if (vocesDisponibles.length === 0) {
-                                    vocesDisponibles = window.speechSynthesis.getVoices();
-                                }
-                                
-                                let vozHumana = vocesDisponibles.find(v => (v.name.includes("Google") || v.name.includes("Microsoft")) && v.lang.startsWith('es'));
-                                if (!vozHumana) {
-                                    vozHumana = vocesDisponibles.find(v => v.lang.startsWith('es'));
-                                }
-                                
-                                if (vozHumana) {
-                                    msg.voice = vozHumana;
-                                }
-
-                                // 2. RESTAURAR EL VOLUMEN NORMAL CUANDO TERMINE DE HABLAR LA VOZ
-                                msg.onend = function() {
-                                    videoFondo.volume = VOLUMEN_NORMAL;
-                                };
-
-                                window.speechSynthesis.speak(msg);
-                            }, 800);
+                                reproducirAudio();
+                            }
                         }
-                    });
-                });
+                    }
+                })
+                .catch(err => console.error("Error sincronizando turnos:", err));
         }
-        setInterval(verificarTurnos, 2000);
+
+        function reproducirAudio() {
+            const audio = document.getElementById('audio-campana');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Audio bloqueado por políticas del navegador:", e));
+            }
+        }
+
+        // Consultar cada 1.5 segundos
+        setInterval(verificarTurnos, 1500);
     </script>
 </body>
 </html>

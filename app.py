@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 from urllib.parse import unquote
 import os
 from flask_sqlalchemy import SQLAlchemy
@@ -18,8 +18,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Zona horaria fija para Perú para corregir desfases de hora
-PERU_TZ = pytz.timezone('America/Lima')
+# Zona horaria nativa para Perú (sin dependencias externas)
+PERU_TZ = ZoneInfo("America/Lima")
 
 def obtener_tiempo_peru():
     return datetime.now(PERU_TZ)
@@ -195,7 +195,7 @@ def index():
         dni = request.form.get('dni')
         preferencial = True if request.form.get('preferencial') == 'on' else False
         if dni:
-            # Prevención de duplicados exactos si se envía dos veces seguidas en menos de 5 segundos con el mismo DNI en espera
+            # Prevención de duplicados exactos si se envía dos veces seguidas con el mismo DNI en espera
             ultimo_ticket = Ticket.query.filter_by(dni=dni, estado='ESPERA').order_by(Ticket.id.desc()).first()
             if not ultimo_ticket:
                 max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
@@ -221,7 +221,7 @@ def registro():
         dni = request.form.get('dni')
         preferencial = True if request.form.get('preferencial') == 'on' else False
         if dni:
-            # Prevención de duplicados exactos si se reenvía el formulario
+            # Prevención de duplicados exactos si se reenvía el formulario rápidamente
             ultimo_ticket = Ticket.query.filter_by(dni=dni, estado='ESPERA').order_by(Ticket.id.desc()).first()
             if not ultimo_ticket:
                 max_t = db.session.query(db.func.max(Ticket.turno)).scalar()

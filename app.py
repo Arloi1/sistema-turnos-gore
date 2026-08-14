@@ -213,7 +213,6 @@ def repetir_turno(ventanilla):
     if v_nombre in estado_visual:
         turno_actual = estado_visual[v_nombre]
         
-        # Si el diccionario en memoria está en 0, buscamos el último en el historial de la base de datos
         if turno_actual == 0:
             ultimo_historial = HistorialAtencion.query.filter_by(ventanilla=v_nombre).order_by(HistorialAtencion.id.desc()).first()
             if ultimo_historial:
@@ -225,7 +224,8 @@ def repetir_turno(ventanilla):
                 "status": "ok", 
                 "ventanilla": v_nombre, 
                 "turno": turno_actual,
-                "repetir": True
+                "repetir": True,
+                "timestamp": datetime.now().timestamp() # Clave para forzar el cambio en la TV
             })
             
     return jsonify({"status": "error", "mensaje": "No hay ningún turno activo para repetir en esta ventanilla."}), 400

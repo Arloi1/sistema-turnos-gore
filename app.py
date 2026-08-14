@@ -304,6 +304,15 @@ def repetir_turno(ventanilla):
 def pantalla(): 
     return render_template('pantalla.html')
 
+@app.route('/historial_semanal', methods=['GET'])
+def historial_semanal():
+    try:
+        # Obtiene todos los registros del historial ordenados del más reciente al más antiguo
+        registros = HistorialAtencion.query.order_by(HistorialAtencion.fecha.desc()).all()
+        return render_template('historial_semanal.html', registros=registros)
+    except Exception as e:
+        return render_template('historial_semanal.html', registros=[])
+
 @app.route('/limpiar_base_datos_secreto')
 def limpiar_db():
     global estado_visual, llamados_actuales

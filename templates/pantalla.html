@@ -27,6 +27,7 @@
             overflow: hidden;
         }
 
+        /* Contenedor del video ocupando todo el espacio superior sin fondos negros */
         .slider-container { 
             width: 100%; 
             flex: 1; 
@@ -35,11 +36,14 @@
             background-color: #000;
         }
 
+        /* Usamos 100% en ambos ejes con fill para forzar a que cubra todo el espacio sin dejar huecos negros ni cortes ciegos */
         #video-fondo {
             width: 100%; 
             height: 100%; 
-            object-fit: cover; 
-            object-position: center top;
+            object-fit: fill; 
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         
         #reloj {
@@ -181,7 +185,6 @@
     <audio id="audio-campana" src="{{ url_for('static', filename='campana.mp3') }}"></audio>
 
     <script>
-        // Estructura robusta para rastrear tanto el número como el instante de actualización
         let estadoActual = {
             "Ventanilla 01": { turno: -1, timestamp: 0 },
             "Ventanilla 02": { turno: -1, timestamp: 0 },
@@ -283,7 +286,6 @@
                             let cardId = "card-" + nV;
                             let contenedor = document.getElementById(cardId);
 
-                            // Detecta cambios si cambia el número de turno O si se actualizó el timestamp (repetición)
                             if (turno !== estadoActual[nV].turno || ts !== estadoActual[nV].timestamp) {
                                 estadoActual[nV].turno = turno;
                                 estadoActual[nV].timestamp = ts;

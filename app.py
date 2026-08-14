@@ -30,54 +30,6 @@ estado_visual = {
     "Ventanilla 03": 0
 }
 
-class Ticket(db.Model):
-    __tablename__ = 'tickets'
-    id = db.Column(db.Integer, primary_key=True)
-    dni = db.Column(db.String(50))
-    nombre = db.Column(db.String(100))
-    fecha_registro = db.Column(db.String(50))
-    estado = db.Column(db.String(50))
-    turno = db.Column(db.Integer)
-    preferencial = db.Column(db.Boolean, default=False)
-
-class HistorialAtencion(db.Model):
-    __tablename__ = 'historial_atenciones'
-    id = db.Column(db.Integer, primary_key=True)
-    ventanilla = db.Column(db.String(100))
-    turno = db.Column(db.Integer)
-    fecha = db.Column(db.DateTime, default=datetime.now)
-    dni = db.Column(db.String(50))from flask import Flask, render_template, request, redirect, jsonify
-from datetime import datetime
-from urllib.parse import unquote
-import os
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
-
-app = Flask(__name__)
-
-database_url = os.environ.get('DATABASE_URL', 'postgresql://turnos_user:tKEDL05OtBzDYWxtBJzjD8trXumanuci@dpg-d9lo31tg1s2s739u3n90-a/turnos_db_dcxx')
-
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-
-# Asignación correcta de operadores por ventanilla
-OPERADORES = {
-    "Ventanilla 01": "Yajaira", 
-    "Ventanilla 02": "Sandra", 
-    "Ventanilla 03": "Jhoe"
-}
-
-estado_visual = {
-    "Ventanilla 01": 0, 
-    "Ventanilla 02": 0, 
-    "Ventanilla 03": 0
-}
-
 llamados_actuales = {
     "Ventanilla 01": {"turno": 0, "intentos": 0},
     "Ventanilla 02": {"turno": 0, "intentos": 0},
@@ -365,7 +317,6 @@ def limpiar_db():
         db.session.execute(text('TRUNCATE TABLE tickets, historial_atenciones RESTART IDENTITY CASCADE;'))
         db.session.commit()
         return "¡Base de datos limpia, contadores en 0 e IDs reiniciados con éxito!"
-    end except Exception as e:
     except Exception as e:
         db.session.rollback()
         return f"Error: {e}"

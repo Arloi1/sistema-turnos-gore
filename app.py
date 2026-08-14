@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, jsonify
 from datetime import datetime
+import pytz
 from urllib.parse import unquote
 import os
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +17,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# Zona horaria fija para Perú para corregir desfases de hora
+PERU_TZ = pytz.timezone('America/Lima')
+
+def obtener_tiempo_peru():
+    return datetime.now(PERU_TZ)
 
 # Asignación correcta de operadores por ventanilla
 OPERADORES = {
@@ -51,7 +58,7 @@ class HistorialAtencion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ventanilla = db.Column(db.String(100))
     turno = db.Column(db.Integer)
-    fecha = db.Column(db.DateTime, default=datetime.now)
+    fecha = db.Column(db.DateTime, default=lambda: obtener_tiempo_peru().replace(tzinfo=None))
     dni = db.Column(db.String(50))
 
 with app.app_context():
@@ -111,7 +118,7 @@ def actualizar_turno(ventanilla):
         nuevo_historial = HistorialAtencion(
             ventanilla=v_nombre,
             turno=turno_real,
-            fecha=datetime.now(),
+            fecha=obtener_tiempo_peru().replace(tzinfo=None),
             dni=dni_ciudadano
         )
         db.session.add(nuevo_historial)
@@ -188,18 +195,21 @@ def index():
         dni = request.form.get('dni')
         preferencial = True if request.form.get('preferencial') == 'on' else False
         if dni:
-            max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
-            nuevo_turno = (max_t or 0) + 1
-            nuevo_ticket = Ticket(
-                dni=dni,
-                nombre="Ciudadano",
-                fecha_registro=datetime.now().strftime("%d/%m/%Y %H:%M"),
-                estado='ESPERA',
-                turno=nuevo_turno,
-                preferencial=preferencial
-            )
-            db.session.add(nuevo_ticket)
-            db.session.commit()
+            # Prevención de duplicados exactos si se envía dos veces seguidas en menos de 5 segundos con el mismo DNI en espera
+            ultimo_ticket = Ticket.query.filter_by(dni=dni, estado='ESPERA').order_by(Ticket.id.desc()).first()
+            if not ultimo_ticket:
+                max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
+                nuevo_turno = (max_t or 0) + 1
+                nuevo_ticket = Ticket(
+                    dni=dni,
+                    nombre="Ciudadano",
+                    fecha_registro=obtener_tiempo_peru().strftime("%d/%m/%Y %H:%M"),
+                    estado='ESPERA',
+                    turno=nuevo_turno,
+                    preferencial=preferencial
+                )
+                db.session.add(nuevo_ticket)
+                db.session.commit()
             return redirect('/')
     
     tickets = Ticket.query.filter_by(estado="ESPERA").order_by(Ticket.id.asc()).all()
@@ -211,18 +221,21 @@ def registro():
         dni = request.form.get('dni')
         preferencial = True if request.form.get('preferencial') == 'on' else False
         if dni:
-            max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
-            nuevo_turno = (max_t or 0) + 1
-            nuevo_ticket = Ticket(
-                dni=dni,
-                nombre="Ciudadano",
-                fecha_registro=datetime.now().strftime("%d/%m/%Y %H:%M"),
-                estado='ESPERA',
-                turno=nuevo_turno,
-                preferencial=preferencial
-            )
-            db.session.add(nuevo_ticket)
-            db.session.commit()
+            # Prevención de duplicados exactos si se reenvía el formulario
+            ultimo_ticket = Ticket.query.filter_by(dni=dni, estado='ESPERA').order_by(Ticket.id.desc()).first()
+            if not ultimo_ticket:
+                max_t = db.session.query(db.func.max(Ticket.turno)).scalar()
+                nuevo_turno = (max_t or 0) + 1
+                nuevo_ticket = Ticket(
+                    dni=dni,
+                    nombre="Ciudadano",
+                    fecha_registro=obtener_tiempo_peru().strftime("%d/%m/%Y %H:%M"),
+                    estado='ESPERA',
+                    turno=nuevo_turno,
+                    preferencial=preferencial
+                )
+                db.session.add(nuevo_ticket)
+                db.session.commit()
             return render_template('registro.html', mensaje="¡Turno generado con éxito!")
     return render_template('registro.html')
 
@@ -277,7 +290,7 @@ def repetir_turno(ventanilla):
                 nuevo_historial = HistorialAtencion(
                     ventanilla=v_nombre,
                     turno=siguiente.turno,
-                    fecha=datetime.now(),
+                    fecha=obtener_tiempo_peru().replace(tzinfo=None),
                     dni=siguiente.dni
                 )
                 db.session.add(nuevo_historial)
@@ -289,7 +302,7 @@ def repetir_turno(ventanilla):
 
         if 'timestamps_visual' not in globals():
             timestamps_visual = {"Ventanilla 01": 0, "Ventanilla 02": 0, "Ventanilla 03": 0}
-        timestamps_visual[v_nombre] = datetime.now().timestamp()
+        timestamps_visual[v_nombre] = obtener_tiempo_peru().timestamp()
         
         return jsonify({
             "status": "ok", 
@@ -312,8 +325,6 @@ def historial_semanal():
     except Exception as e:
         return render_template('historial_semanal.html', registros=[])
 
-# FUNCIÓN SEGURA: Limpia únicamente los tickets activos de la semana y reinicia contadores,
-# preservando por completo los registros acumulados en 'historial_atenciones'.
 @app.route('/limpiar_base_datos_secreto')
 def limpiar_db():
     global estado_visual, llamados_actuales
@@ -324,7 +335,6 @@ def limpiar_db():
             "Ventanilla 02": {"turno": 0, "intentos": 0},
             "Ventanilla 03": {"turno": 0, "intentos": 0}
         }
-        # TRUNCATE solo a la tabla 'tickets' para no borrar el historial semanal
         db.session.execute(text('TRUNCATE TABLE tickets RESTART IDENTITY CASCADE;'))
         db.session.commit()
         return "¡Contadores en 0 y tickets de la semana reiniciados con éxito! El historial de atenciones se mantiene intacto."

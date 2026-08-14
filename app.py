@@ -79,8 +79,8 @@ def obtener_estado_colas():
     
     return jsonify({
         "turno_actual": turno_actual_activo,
-        "cola_espera": [{"id": t.turno, "dni": t.dni, "preferencial": t.preferencial} for t in tickets_espera],
-        "cola_archivados": [{"id": t.turno, "dni": t.dni, "preferencial": t.preferencial} for t in tickets_archivados]
+        "cola_espera": [t.turno for t in tickets_espera],
+        "cola_archivados": [t.turno for t in tickets_archivados]
     })
 
 @app.route('/actualizar_turno/<ventanilla>', methods=['GET', 'POST'])

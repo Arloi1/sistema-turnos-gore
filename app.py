@@ -225,11 +225,10 @@ def repetir_turno(ventanilla):
                 "ventanilla": v_nombre, 
                 "turno": turno_actual,
                 "repetir": True,
-                "timestamp": datetime.now().timestamp() # Clave para forzar el cambio en la TV
+                "timestamp": datetime.now().timestamp() # Obliga a la pantalla a registrar el evento de repetición
             })
             
     return jsonify({"status": "error", "mensaje": "No hay ningún turno activo para repetir en esta ventanilla."}), 400
-
 @app.route('/pantalla')
 def pantalla(): 
     return render_template('pantalla.html')

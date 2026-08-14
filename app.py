@@ -215,28 +215,20 @@ def control_jhoe():
 
 @app.route('/repetir_turno/<ventanilla>', methods=['POST'])
 def repetir_turno(ventanilla):
-    global estado_visual
+    global estado_visual, timestamps_visual
     v_nombre = unquote(ventanilla)
     
-    if v_nombre in estado_visual:
-        turno_actual = estado_visual[v_nombre]
+    if v_nombre in estado_visual and estado_visual[v_nombre] > 0:
+        # Actualizamos el timestamp para forzar a la pantalla a relanzar el evento
+        timestamps_visual[v_nombre] = datetime.now().timestamp()
+        return jsonify({
+            "status": "ok", 
+            "ventanilla": v_nombre, 
+            "turno": estado_visual[v_nombre]
+        })
         
-        if turno_actual == 0:
-            ultimo_historial = HistorialAtencion.query.filter_by(ventanilla=v_nombre).order_by(HistorialAtencion.id.desc()).first()
-            if ultimo_historial:
-                turno_actual = ultimo_historial.turno
-                estado_visual[v_nombre] = turno_actual
-
-        if turno_actual > 0:
-            return jsonify({
-                "status": "ok", 
-                "ventanilla": v_nombre, 
-                "turno": turno_actual,
-                "repetir": True,
-                "timestamp": datetime.now().timestamp() # Obliga a la pantalla a registrar el evento de repetición
-            })
-            
-    return jsonify({"status": "error", "mensaje": "No hay ningún turno activo para repetir en esta ventanilla."}), 400
+    return jsonify({"status": "error", "mensaje": "No hay turno activo"}), 400
+    
 @app.route('/pantalla')
 def pantalla(): 
     return render_template('pantalla.html')

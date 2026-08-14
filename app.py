@@ -131,12 +131,20 @@ def historial():
         db.create_all()
         return render_template('historial.html', registros=[])
 
-@app.route('/obtener_todos_los_turnos', methods=['GET'])
-def obtener_todos(): 
+@app.route('/obtener_todos_los_turnos')
+def obtener_todos_los_turnos():
+    global estado_visual, timestamps_visual
+    # Si no tienes timestamps_visual global, puedes crearlo o usar la hora actual combinada
+    if 'timestamps_visual' not in globals():
+        global timestamps_visual
+        timestamps_visual = {"Ventanilla 01": 0, "Ventanilla 02": 0, "Ventanilla 03": 0}
+        
     resultado = {}
-    for v in ["Ventanilla 01", "Ventanilla 02", "Ventanilla 03"]:
-        ultimo = HistorialAtencion.query.filter_by(ventanilla=v).order_by(HistorialAtencion.id.desc()).first()
-        resultado[v] = ultimo.turno if ultimo else 0
+    for v, t in estado_visual.items():
+        resultado[v] = {
+            "turno": t,
+            "timestamp": timestamps_visual.get(v, 0)
+        }
     return jsonify(resultado)
 
 @app.route('/resetear_turnos', methods=['POST'])

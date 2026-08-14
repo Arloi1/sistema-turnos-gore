@@ -307,12 +307,13 @@ def pantalla():
 @app.route('/historial_semanal', methods=['GET'])
 def historial_semanal():
     try:
-        # Obtiene todos los registros del historial ordenados del más reciente al más antiguo
         registros = HistorialAtencion.query.order_by(HistorialAtencion.fecha.desc()).all()
         return render_template('historial_semanal.html', registros=registros)
     except Exception as e:
         return render_template('historial_semanal.html', registros=[])
 
+# FUNCIÓN SEGURA: Limpia únicamente los tickets activos de la semana y reinicia contadores,
+# preservando por completo los registros acumulados en 'historial_atenciones'.
 @app.route('/limpiar_base_datos_secreto')
 def limpiar_db():
     global estado_visual, llamados_actuales
@@ -323,9 +324,10 @@ def limpiar_db():
             "Ventanilla 02": {"turno": 0, "intentos": 0},
             "Ventanilla 03": {"turno": 0, "intentos": 0}
         }
-        db.session.execute(text('TRUNCATE TABLE tickets, historial_atenciones RESTART IDENTITY CASCADE;'))
+        # TRUNCATE solo a la tabla 'tickets' para no borrar el historial semanal
+        db.session.execute(text('TRUNCATE TABLE tickets RESTART IDENTITY CASCADE;'))
         db.session.commit()
-        return "¡Base de datos limpia, contadores en 0 e IDs reiniciados con éxito!"
+        return "¡Contadores en 0 y tickets de la semana reiniciados con éxito! El historial de atenciones se mantiene intacto."
     except Exception as e:
         db.session.rollback()
         return f"Error: {e}"

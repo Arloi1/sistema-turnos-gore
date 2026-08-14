@@ -387,24 +387,29 @@
             });
         }
 
-        function repetirTurno(ventanilla) {
+      function repetirTurno(ventanilla) {
             fetch(`/repetir_turno/${encodeURIComponent(ventanilla)}`, {
                 method: 'POST'
             })
-            .then(r => r.json())
-            .then(data => {
-                if (data.status === "ok") {
-                    console.log("Repitiendo turno: " + data.turno);
+            .then(async r => {
+                const data = await r.json();
+                if (r.ok && data.status === "ok") {
+                    console.log("Turno repetido con éxito: " + data.turno);
+                    // Opcional: puedes hacer parpadear el número en pantalla para dar feedback visual
+                    let el = document.getElementById('display-turno');
+                    if (el) {
+                        el.style.transform = "scale(1.1)";
+                        setTimeout(() => el.style.transform = "scale(1)", 200);
+                    }
                 } else {
-                    alert("No hay ningún turno activo para repetir en esta ventanilla.");
+                    alert("Aviso: " + (data.mensaje || "No hay ningún turno activo para repetir en esta ventanilla."));
                 }
             })
             .catch(error => {
-                console.log("Error al repetir:", error);
-                alert("Error de conexión al intentar repetir el turno.");
+                console.error("Error al repetir:", error);
+                alert("Error de conexión al intentar repetir el turno con el servidor.");
             });
         }
-
         // --- ATAJOS DE TECLADO (+ y -) ---
         document.addEventListener('keydown', function(event) {
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;

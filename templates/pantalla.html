@@ -181,7 +181,13 @@
     <audio id="audio-campana" src="{{ url_for('static', filename='campana.mp3') }}"></audio>
 
     <script>
-        let estadoActual = {"Ventanilla 01": {turno: -1, lastUpdate: 0}, "Ventanilla 02": {turno: -1, lastUpdate: 0}, "Ventanilla 03": {turno: -1, lastUpdate: 0}};
+        // Estructura robusta para rastrear tanto el número como el instante de actualización
+        let estadoActual = {
+            "Ventanilla 01": { turno: -1, timestamp: 0 },
+            "Ventanilla 02": { turno: -1, timestamp: 0 },
+            "Ventanilla 03": { turno: -1, timestamp: 0 }
+        };
+        
         let vocesDisponibles = [];
         let sistemaIniciado = false;
         
@@ -239,9 +245,13 @@
                 .then(r => r.json())
                 .then(data => {
                     Object.keys(data).forEach(nV => {
-                        let turno = data[nV];
+                        let info = data[nV];
+                        let turno = (typeof info === 'object') ? info.turno : info;
+                        let ts = (typeof info === 'object') ? info.timestamp : 0;
+                        
                         if (turno > 0) {
                             estadoActual[nV].turno = turno;
+                            estadoActual[nV].timestamp = ts;
                             let elementId = "turno-" + nV.replace(/ /g, "-");
                             let el = document.getElementById(elementId);
                             if (el) el.innerText = turno;
@@ -262,7 +272,10 @@
                 .then(r => r.json())
                 .then(data => {
                     Object.keys(data).forEach(nV => {
-                        let turno = data[nV];
+                        let info = data[nV];
+                        let turno = (typeof info === 'object') ? info.turno : info;
+                        let ts = (typeof info === 'object') ? info.timestamp : 0;
+
                         if (turno > 0) {
                             let elementId = "turno-" + nV.replace(/ /g, "-");
                             let el = document.getElementById(elementId);
@@ -270,11 +283,12 @@
                             let cardId = "card-" + nV;
                             let contenedor = document.getElementById(cardId);
 
-                            // Si cambia el número O si forzamos repetición detectando un cambio en backend
-                            if (turno !== estadoActual[nV].turno) {
+                            // Detecta cambios si cambia el número de turno O si se actualizó el timestamp (repetición)
+                            if (turno !== estadoActual[nV].turno || ts !== estadoActual[nV].timestamp) {
                                 estadoActual[nV].turno = turno;
-                                estadoActual[nV].lastUpdate = Date.now();
+                                estadoActual[nV].timestamp = ts;
                                 el.innerText = turno;
+                                
                                 dispararAlertaYAudio(nV, turno, contenedor);
                             }
                         }

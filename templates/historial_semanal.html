@@ -13,7 +13,7 @@
         th { background: #004a99; color: white; font-weight: 600; }
         tr:hover { background: #f8fafc; }
         .btn-volver { display: inline-block; background: #004a99; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 15px; }
-        .btn-volver:hover { background: #003366; }
+        .btn-volver:hover { background: #003366; color: white; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -35,7 +35,7 @@
                     <td><strong>#{{ reg.turno }}</strong></td>
                     <td>{{ reg.ventanilla }}</td>
                     <td>{{ reg.dni }}</td>
-                    <td>{{ reg.fecha.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+                    <td>{{ reg.fecha.strftime('%d/%m/%Y %H:%M:%S') if reg.fecha else '' }}</td>
                 </tr>
                 {% else %}
                 <tr>

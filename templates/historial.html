@@ -174,12 +174,12 @@
             miGrafico = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels.length > 0 ? labels : ["Ventanilla 01", "Ventanilla 02"],
+                    labels: labels.length > 0 ? labels : ["Ventanilla 01", "Ventanilla 02", "Ventanilla 03"],
                     datasets: [{
                         label: 'Personas Atendidas',
-                        data: data.length > 0 ? data : [0, 0],
-                        backgroundColor: ['#004a99', '#c5a059'],
-                        borderColor: ['#003366', '#a68344'],
+                        data: data.length > 0 ? data : [0, 0, 0],
+                        backgroundColor: ['#004a99', '#c5a059', '#003366'],
+                        borderColor: ['#003366', '#a68344', '#001f3f'],
                         borderWidth: 1,
                         borderRadius: 5
                     }]

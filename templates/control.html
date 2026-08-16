@@ -266,16 +266,6 @@
             color: #c53030;
             font-weight: 600;
         }
-        .item-historial {
-            background: #f8fafc;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border-left: 4px solid var(--dorado-gore);
-            font-size: 0.8rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
     </style>
 </head>
 <body>
@@ -389,16 +379,17 @@
 
         // Sincronizar datos de colas, turnos y archivados con el backend
         function actualizarDatosPanel() {
+            // Si la pestaña está oculta, no hacemos fetch para ahorrar ancho de banda
+            if (document.hidden) return;
+
             fetch('/obtener_estado_colas?ventanilla=' + encodeURIComponent(config.ventanilla))
                 .then(r => r.json())
                 .then(data => {
-                    // Actualizar turno actual en pantalla si aplica
                     if (data.turno_actual) {
                         let el = document.getElementById('display-turno');
                         if (el && data.turno_actual > 0) el.innerText = data.turno_actual;
                     }
 
-                    // Renderizar Cola de Espera
                     let contenedorEspera = document.getElementById('lista-espera');
                     let badgeEspera = document.getElementById('contador-espera');
                     if (data.cola_espera && data.cola_espera.length > 0) {
@@ -414,7 +405,6 @@
                         contenedorEspera.innerHTML = `<div style="color: #888; text-align: center; margin-top: 20px; font-size: 0.8rem;">No hay tickets en espera.</div>`;
                     }
 
-                    // Renderizar Cola de Archivados (No atendidos tras 3 llamados)
                     let contenedorArchivados = document.getElementById('lista-archivados');
                     let badgeArchivados = document.getElementById('contador-archivados');
                     if (data.cola_archivados && data.cola_archivados.length > 0) {
@@ -475,7 +465,6 @@
             .catch(error => console.error("Error al repetir:", error));
         }
 
-        // Atajos de teclado (+ y -)
         document.addEventListener('keydown', function(event) {
             if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
 
@@ -488,9 +477,17 @@
             }
         });
 
+        // Evento para actualizar inmediatamente si el operador vuelve a enfocar la pestaña
+        document.addEventListener("visibilitychange", function() {
+            if (!document.hidden) {
+                actualizarDatosPanel();
+            }
+        });
+
         window.onload = function() {
             actualizarDatosPanel();
-            setInterval(actualizarDatosPanel, 2000); // Sincronización continua de colas
+            // Intervalo cambiado a 7 segundos (7000 ms) para reducir drásticamente el tráfico en Render
+            setInterval(actualizarDatosPanel, 7000); 
         };
     </script>
 </body>
